@@ -96,3 +96,6 @@ ipch
 # SQL Server files
 *.mdf
 *.ldf
+
+# Nvidia OptiX/CUDA auto-generated files
+*.ptx
