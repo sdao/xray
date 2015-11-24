@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="CUDA_files\box.cu">
+      <Filter>CUDA_files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\constantbg.cu">
+      <Filter>CUDA_files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\phong.cu">
+      <Filter>CUDA_files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\pinhole_camera.cu">
+      <Filter>CUDA_files</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="optix_project.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CUDA_files\phong.h">
+      <Filter>CUDA_files</Filter>
+    </ClInclude>
+    <ClInclude Include="optix_helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+    <Text Include="PTX_files\ReadMe_dir.txt">
+      <Filter>PTX_files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CUDA_files">
+      <UniqueIdentifier>{80a37067-ddce-493c-abc2-5b4d1ababb28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PTX_files">
+      <UniqueIdentifier>{7d1a8494-0e30-43da-8f82-c97c0092f2f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{0d91650a-e98f-4f7d-9592-302a063a26bb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
