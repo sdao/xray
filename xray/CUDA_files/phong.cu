@@ -58,4 +58,5 @@ RT_PROGRAM void closest_hit_radiance()
 	float3 ffnormal = faceforward( world_shading_normal, -ray.direction, world_geometric_normal );
 	// Use the phong shading equation by supplying it common parameters
 	phongShade( Kd, Ka, Ks, ffnormal, phong_exp, reflectivity );
+  //prd.result = make_float3(1, 0, 0);
 }

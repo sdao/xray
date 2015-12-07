@@ -13,9 +13,25 @@
     <CudaCompile Include="CUDA_files\pinhole_camera.cu">
       <Filter>CUDA_files</Filter>
     </CudaCompile>
+    <CudaCompile Include="CUDA_files\disc.cu">
+      <Filter>CUDA_files\geoms</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\sphere.cu">
+      <Filter>CUDA_files\geoms</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\triangle_mesh.cu">
+      <Filter>CUDA_files\geoms</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\camera.cu">
+      <Filter>CUDA_files</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="optix_project.cpp" />
+    <ClCompile Include="sphere.cc" />
+    <ClCompile Include="disc.cc" />
+    <ClCompile Include="mesh.cc" />
+    <ClCompile Include="geom.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CUDA_files\phong.h">
@@ -24,6 +40,13 @@
     <ClInclude Include="optix_helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="geom.h" />
+    <ClInclude Include="sphere.h" />
+    <ClInclude Include="CUDA_files\math.cuh">
+      <Filter>CUDA_files</Filter>
+    </ClInclude>
+    <ClInclude Include="disc.h" />
+    <ClInclude Include="mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -41,5 +64,11 @@
     <Filter Include="Header Files">
       <UniqueIdentifier>{0d91650a-e98f-4f7d-9592-302a063a26bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CUDA_files\geoms">
+      <UniqueIdentifier>{0549cfc3-2387-4bff-a085-78077c139014}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

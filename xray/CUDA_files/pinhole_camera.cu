@@ -91,7 +91,7 @@ RT_PROGRAM void pinhole_camera()
   // and will ultimately be set to the result of the shading process
   rtTrace(top_object, ray, prd);
 
-  output_buffer[launch_index] = make_color( prd.result );
+  output_buffer[launch_index] = make_color( make_float3(prd.result.z, prd.result.x, prd.result.y) );
 }
 
 RT_PROGRAM void exception()
