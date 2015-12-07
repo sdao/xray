@@ -17,6 +17,9 @@
  * INABILITY TO USE THIS SOFTWARE, EVEN IF NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGES
  */
+#include "sphere.h"
+#include "disc.h"
+#include "mesh.h"
 #include "optix_helpers.h"
 
 #define WIDTH   512
@@ -27,8 +30,8 @@
 
 // ----------------------------------- OptiX Routines -----------------------------------
 sUtilWrapper *sUtil;
-void createContext(RTcontext* context, RTbuffer* output_buffer_obj);
-void createGeometry(RTcontext context, RTgeometry* box);
+optix::Context createContext(RTcontext* context, RTbuffer* output_buffer_obj);
+void createGeometry(optix::Context context, RTgeometry* box);
 void createMaterial(RTcontext context, RTmaterial* material);
 void createInstances(RTcontext context, RTgeometry box, RTmaterial material);
 // --------------------------------------------------------------------------------------
@@ -48,11 +51,11 @@ int main(int argc, char** argv)
 
   // Step 1 - create an OptiX context and indicate the resulting buffer where the scene will be drawn
   RTcontext context;
-  createContext(&context, &output_buffer_obj);
+  optix::Context contextCpp = createContext(&context, &output_buffer_obj);
 
   // Step 2 - create the geometry of the scene
   RTgeometry box;
-  createGeometry(context, &box);
+  createGeometry(contextCpp, &box);
 
   // Step 3 - create materials for the objects in the scene
   RTmaterial material;
@@ -82,11 +85,12 @@ int main(int argc, char** argv)
 
 // In order for Optix to work, a context and some entry points (objects that contain a ray generation program and a miss program)
 // must be created. If these programs have variables associated with them, they need to be created (and defined) as well.
-void createContext(RTcontext* context, RTbuffer* output_buffer_obj)
+optix::Context createContext(RTcontext* context, RTbuffer* output_buffer_obj)
 {
+  optix::Context res = optix::Context::create();
   // Create an OptiX context. A context is necessary to ray trace a scene and contains all materials, geometries, textures, etc...
   // It is the fundamental part of an OptiX scene
-  rtContextCreate(context);
+  *context = res->get();
 
   // We will be using 2 kind of rays in this example, a shadow ray and a radiance ray
   rtContextSetRayTypeCount(*context, 2);
@@ -189,43 +193,43 @@ void createContext(RTcontext* context, RTbuffer* output_buffer_obj)
   rtProgramDeclareVariable( miss_program, "bg_color" , &color) ;
   rtVariableSet3f( color, .3f, 0.1f, 0.2f ) ;
   rtContextSetMissProgram( *context, 0, miss_program ) ;
+
+  return res;
 }
 
 // A geometry node (at least one) is necessary to draw a scene. Here we will create a geometry (the box) and its bounding box (that we will
 // make the same as the box), we will create the geometry node afterwards and assign it this geometry. Each geometry has also an intersection and bounding box program.
-void createGeometry(RTcontext context, RTgeometry* box)
+void createGeometry(optix::Context context, RTgeometry* box)
 {
-  RTprogram  box_intersection_program;
-  RTprogram  box_bounding_box_program;
-  RTvariable box_min_var;
-  RTvariable box_max_var;
+  //float     box_min[3];
+  //float     box_max[3];
 
-  float     box_min[3];
-  float     box_max[3];
+  //char path_to_ptx[512];
+  //sprintf_s(path_to_ptx, 512,"%s/%s", PATH_TO_MY_PTX_FILES, "box.cu.ptx");
 
-  // OptiX proceeds by creating nodes for geometries, acceleration structures, etc.. this allows to share one of these objects
-  // among other nodes, here a single geometry node for this context is created
-  rtGeometryCreate(context, box) ;
-  // Sets just one primitive on this geometry node
-  rtGeometrySetPrimitiveCount( *box, 1u ) ;
+  //// Specify a simple object-space bounding box from the minimum point to the maximum point of the cube
+  //box_min[0] = box_min[1] = box_min[2] = -0.5f;
+  //box_max[0] = box_max[1] = box_max[2] =  0.5f;
 
-  char path_to_ptx[512];
-  sprintf_s(path_to_ptx, 512,"%s/%s", PATH_TO_MY_PTX_FILES, "box.cu.ptx");
-  rtProgramCreateFromPTXFile( context, path_to_ptx, "box_bounds", &box_bounding_box_program );
-  // Each geometry node must have a bounding box program, this program computes the axis-aligned bounding box for everything inside this node
-  rtGeometrySetBoundingBoxProgram( *box, box_bounding_box_program );
-  rtProgramCreateFromPTXFile( context, path_to_ptx, "box_intersect", &box_intersection_program );
-  rtGeometrySetIntersectionProgram( *box, box_intersection_program );
 
-  // Specify a simple object-space bounding box from the minimum point to the maximum point of the cube
-  box_min[0] = box_min[1] = box_min[2] = -0.5f;
-  box_max[0] = box_max[1] = box_max[2] =  0.5f;
+  //optix::Geometry ge = context->createGeometry();
+  //ge->setPrimitiveCount(1u);
+  //ge->setBoundingBoxProgram(context->createProgramFromPTXFile(path_to_ptx, "box_bounds"));
+  //ge->setIntersectionProgram(context->createProgramFromPTXFile(path_to_ptx, "box_intersect"));
+  //ge["boxmin"]->set3fv(box_min);
+  //ge["boxmax"]->set3fv(box_max);
+  //*box = ge->get();
 
-  // Make these variables available to the gpu and store the chosen value
-  rtGeometryDeclareVariable( *box, "boxmin", &box_min_var ) ;
-  rtGeometryDeclareVariable( *box, "boxmax", &box_max_var ) ;
-  rtVariableSet3fv( box_min_var, box_min ) ;
-  rtVariableSet3fv( box_max_var, box_max ) ;
+ // Disc disc(context, optix::make_float3(0), optix::make_float3(1, 0, 0), 0.5f, 0.2f);
+  //Sphere sph(optix::make_float3(0, 0, 0), 0.5f);
+  Mesh mesh(context, optix::make_float3(0), "dodeca.obj");
+  try {
+  auto res = mesh.makeOptixGeometry();
+  *box = res->get();
+  } catch (optix::Exception& e) {
+    std::string err = e.getErrorString();
+    throw;
+  }
 }
 
 // Each time a ray hits a geometry and (possibly) calculates normals/shading parameters, a material needs to be associated with that geometry
