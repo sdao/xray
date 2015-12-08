@@ -32,6 +32,7 @@
     <ClCompile Include="disc.cc" />
     <ClCompile Include="mesh.cc" />
     <ClCompile Include="geom.cc" />
+    <ClCompile Include="camera.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CUDA_files\phong.h">
@@ -47,6 +48,7 @@
     </ClInclude>
     <ClInclude Include="disc.h" />
     <ClInclude Include="mesh.h" />
+    <ClInclude Include="camera.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

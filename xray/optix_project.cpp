@@ -20,6 +20,7 @@
 #include "sphere.h"
 #include "disc.h"
 #include "mesh.h"
+#include "camera.h"
 #include "optix_helpers.h"
 
 #define WIDTH   512
@@ -167,24 +168,9 @@ optix::Context createContext(RTcontext* context, RTbuffer* output_buffer_obj)
   RTprogram  ray_gen_program;
   RTprogram  miss_program;
   sprintf_s( path_to_ptx, 512, "%s/%s", PATH_TO_MY_PTX_FILES, "pinhole_camera.cu.ptx" );
-  rtProgramCreateFromPTXFile( *context, path_to_ptx, "pinhole_camera", &ray_gen_program ) ;
-  // Sets the eye of the spectator (the camera if you want) to be at 0;0;5. Like in openGL's convention we're looking
-  // at the Z axis on its negative side. It also sets three vectors for a left-handed base
-  RTvariable eye;
-  RTvariable U;
-  RTvariable V;
-  RTvariable W;
-  rtProgramDeclareVariable( ray_gen_program, "eye", &eye );
-  rtProgramDeclareVariable( ray_gen_program, "U", &U );
-  rtProgramDeclareVariable( ray_gen_program, "V", &V );
-  rtProgramDeclareVariable( ray_gen_program, "W", &W );
-  rtVariableSet3f( eye, 0.0f, 0.0f, 5.0f );
-  // U, V and W form a left-handed base
-  rtVariableSet3f( U, 1.0f, 0.0f, 0.0f );
-  rtVariableSet3f( V, 0.0f, 1.0f, 0.0f );
-  rtVariableSet3f( W, 0.0f, 0.0f, -1.0f );
   // Set the ray generation program for entry point 0 (associate the entry point 0 with this program)
-  rtContextSetRayGenerationProgram( *context, 0, ray_gen_program ) ;
+  Camera c(res, optix::Matrix4x4::translate(optix::make_float3(0, 0, 5)), WIDTH, HEIGHT, 1.5);
+  rtContextSetRayGenerationProgram( *context, 0, c.getProgram()->get() ) ;
 
   // Set the miss program
   sprintf_s( path_to_ptx,512,  "%s/%s", PATH_TO_MY_PTX_FILES, "constantbg.cu.ptx" );

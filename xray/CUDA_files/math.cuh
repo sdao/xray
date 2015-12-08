@@ -1,6 +1,12 @@
+#pragma once
+#define _USE_MATH_DEFINES
 #include <optix.h>
 #include <limits>
+#include <cmath>
 
+/** A very small nonzero value. */
+#define XRAY_VERY_SMALL 0.0001f
+#define XRAY_PI_4 0.7853981633974483
 
 namespace math {
   using namespace optix;
@@ -32,6 +38,16 @@ namespace math {
       *v2 = make_float3(0.0f, v1.z * invLen, -v1.y * invLen);
     }
     *v3 = cross(v1, *v2);
+  }
+
+  __host__ __device__ __inline__ float3 pointXform(float3 v, Matrix4x4 xform) {
+    float4 world = xform * make_float4(v.x, v.y, v.z, 1);
+    return make_float3(world.x / world.w, world.y / world.w, world.z / world.w);
+  }
+
+  __host__ __device__ __inline__ float3 vectorXform(float3 v, Matrix4x4 xform) {
+    float4 world = xform * make_float4(v.x, v.y, v.z, 0);
+    return make_float3(world.x, world.y, world.z);
   }
 
 }
