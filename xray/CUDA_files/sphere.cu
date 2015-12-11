@@ -13,12 +13,7 @@ rtDeclareVariable(float, radius, , );
 rtDeclareVariable(int, invertMode, , );
 
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
-
-//rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
-
-rtDeclareVariable(float3, texcoord, attribute texcoord, ); 
-rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, ); 
-rtDeclareVariable(float3, shading_normal, attribute shading_normal, ); 
+rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
 
 RT_PROGRAM void sphereIntersect(int) {
   bool inverted = invertMode != 0;
@@ -46,9 +41,7 @@ RT_PROGRAM void sphereIntersect(int) {
         float3 pt = math::at(ray, resNeg);
         float3 normal = normalize(inverted ? origin - pt : pt - origin);
 
-        //isectNormal = normal;
-				texcoord = make_float3( 0.0f );
-				shading_normal = geometric_normal = normal;
+        isectNormal = normal;
         rtReportIntersection(0);
       }
     } else if (math::isPositive(resPos)) {
@@ -56,9 +49,7 @@ RT_PROGRAM void sphereIntersect(int) {
         float3 pt = math::at(ray, resPos);
         float3 normal = normalize(inverted ? origin - pt : pt - origin);
       
-        //isectNormal = normal;
-				texcoord = make_float3( 0.0f );
-				shading_normal = geometric_normal = normal;
+        isectNormal = normal;
         rtReportIntersection(0);
       }
     }

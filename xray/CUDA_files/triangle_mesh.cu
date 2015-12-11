@@ -6,20 +6,13 @@
 
 using namespace optix;
 
-// This is to be plugged into an RTgeometry object to represent
-// a triangle mesh with a vertex buffer of triangle soup (triangle list)
-// with an interleaved position, normal, texturecoordinate layout.
-
 rtBuffer<float3> vertexBuffer;     
 rtBuffer<float3> normalBuffer;
 rtBuffer<int3> faceIndices; // Index into vertex/normalBuffer for each face.
 
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
 
-//rtDeclareVariable(float3, isectNormal, attribute isectNormal, ); 
-rtDeclareVariable(float3, texcoord, attribute texcoord, ); 
-rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, ); 
-rtDeclareVariable(float3, shading_normal, attribute shading_normal, ); 
+rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
 
 RT_PROGRAM void meshIntersect(int primIdx)
 {
@@ -40,8 +33,8 @@ RT_PROGRAM void meshIntersect(int primIdx)
       float3 n0 = normalBuffer[face.x];
       float3 n1 = normalBuffer[face.y];
       float3 n2 = normalBuffer[face.z];
-      texcoord = make_float3(0);
-      shading_normal = geometric_normal = normalize(n1 * beta + n2 * gamma + n0 * (1.0f - beta - gamma));
+      
+      isectNormal = normalize(n1 * beta + n2 * gamma + n0 * (1.0f - beta - gamma));
       rtReportIntersection(0);
     }
   }

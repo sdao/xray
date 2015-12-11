@@ -1,18 +1,24 @@
 #include "geom.h"
 
-Geom::Geom(optix::Context ctx) :  _ctx(ctx), _material(nullptr) {}
+Geom::Geom(optix::Context ctx) : _ctx(ctx), _geom(ctx->createGeometry()), _frozen(false) {}
 
 Geom::~Geom() {}
 
-std::string Geom::getPtxFileName(std::string cuFile) const {
-  return str(boost::format("PTX_files/%1%.ptx") % cuFile);
+void Geom::freeze() {
+  if (_frozen) {
+    return;
+  }
+
+  _geom->setPrimitiveCount(getPrimitiveCount());
+  _geom->setIntersectionProgram(_ctx->createProgramFromPTXFile(getPtxFile(), getIsectProgram()));
+  _geom->setBoundingBoxProgram(_ctx->createProgramFromPTXFile(getPtxFile(), getBoundsProgram()));
+  _frozen = true;
 }
 
-optix::GeometryInstance Geom::makeInstance() const {
-  optix::Geometry geom = makeOptixGeometry();
-  optix::GeometryInstance instance = _ctx->createGeometryInstance();
-  instance->setGeometry(geom);
-  instance->setMaterialCount(1u);
-  instance->setMaterial(0u, _material);
-  return instance;
+optix::Geometry Geom::getGeometry() const {
+  if (_frozen) {
+    return _geom;
+  }
+
+  return nullptr;
 }

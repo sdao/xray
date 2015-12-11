@@ -50,4 +50,25 @@ namespace math {
     return make_float3(world.x, world.y, world.z);
   }
 
+  __host__ __device__ __inline__ float saturate(float x) {
+#ifdef __CUDACC__
+    return __saturatef(x);
+#else 
+    return x < 0 ? 0 : (x > 1 ? 1 : x);
+#endif
+  }
+
+  __host__ __device__ __inline__ optix::uchar4 colorToBgra(const optix::float3& c) {
+    return optix::make_uchar4(
+      static_cast<unsigned char>(saturate(c.z) * 255.99f), /* B */
+      static_cast<unsigned char>(saturate(c.y) * 255.99f), /* G */
+      static_cast<unsigned char>(saturate(c.x) * 255.99f), /* R */
+      255u /* A */
+    );                                                 
+  }
+
+  __host__ __device__ __inline__ optix::Matrix4x4 rotationThenTranslation(float angle, optix::float3 axis, optix::float3 offset) {
+    return optix::Matrix4x4::translate(offset) * optix::Matrix4x4::rotate(angle, axis);
+  }
+
 }

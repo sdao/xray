@@ -1,18 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="CUDA_files\box.cu">
-      <Filter>CUDA_files</Filter>
-    </CudaCompile>
-    <CudaCompile Include="CUDA_files\constantbg.cu">
-      <Filter>CUDA_files</Filter>
-    </CudaCompile>
-    <CudaCompile Include="CUDA_files\phong.cu">
-      <Filter>CUDA_files</Filter>
-    </CudaCompile>
-    <CudaCompile Include="CUDA_files\pinhole_camera.cu">
-      <Filter>CUDA_files</Filter>
-    </CudaCompile>
     <CudaCompile Include="CUDA_files\disc.cu">
       <Filter>CUDA_files\geoms</Filter>
     </CudaCompile>
@@ -25,19 +13,32 @@
     <CudaCompile Include="CUDA_files\camera.cu">
       <Filter>CUDA_files</Filter>
     </CudaCompile>
+    <CudaCompile Include="CUDA_files\anyhit.cu">
+      <Filter>CUDA_files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\normaltest.cu">
+      <Filter>CUDA_files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\constant.cu">
+      <Filter>CUDA_files</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="optix_project.cpp" />
     <ClCompile Include="sphere.cc" />
     <ClCompile Include="disc.cc" />
     <ClCompile Include="mesh.cc" />
     <ClCompile Include="geom.cc" />
     <ClCompile Include="camera.cc" />
+    <ClCompile Include="material.cc" />
+    <ClCompile Include="normaltest.cc" />
+    <ClCompile Include="instance.cc" />
+    <ClCompile Include="node.cc" />
+    <ClCompile Include="scene.cc" />
+    <ClCompile Include="xray.cc" />
+    <ClCompile Include="main.cc" />
+    <ClCompile Include="constant.cc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CUDA_files\phong.h">
-      <Filter>CUDA_files</Filter>
-    </ClInclude>
     <ClInclude Include="optix_helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -49,6 +50,16 @@
     <ClInclude Include="disc.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="material.h" />
+    <ClInclude Include="CUDA_files\core.cuh">
+      <Filter>CUDA_files</Filter>
+    </ClInclude>
+    <ClInclude Include="normaltest.h" />
+    <ClInclude Include="instance.h" />
+    <ClInclude Include="node.h" />
+    <ClInclude Include="scene.h" />
+    <ClInclude Include="xray.h" />
+    <ClInclude Include="constant.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

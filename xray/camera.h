@@ -3,9 +3,18 @@
 #include <optix.h>
 #include <optix_world.h>
 #include "CUDA_files/math.cuh"
+#include "instance.h"
+#include "node.h"
+#include "xray.h"
 
 class Camera {
   mutable optix::Context _ctx;
+  optix::Program _cam;
+  optix::Program _miss;
+  optix::Buffer _raw;
+  optix::Buffer _image;
+
+  const std::vector<const Instance*> _objs;
 
   int _w;
   int _h;
@@ -20,15 +29,20 @@ class Camera {
 
 public:
   Camera(
-    optix::Context ctx,
+    Xray xray,
     optix::Matrix4x4 xform,
+    const std::vector<const Instance*>& objs,
     int ww,
     int hh,
     float fov = XRAY_PI_4,
     float len = 50.0f,
     float fStop = 16.0f
   );
+  ~Camera();
 
-  optix::Program getProgram() const;
+  static Camera* make(Xray xray, const Node& n);
+
+  optix::Buffer getImageBuffer();
+  void render();
 };
 

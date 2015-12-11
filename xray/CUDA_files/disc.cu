@@ -14,11 +14,7 @@ rtDeclareVariable(float, radiusOuter, , );
 rtDeclareVariable(float, radiusInner, , );
 
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
-
-//rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
-rtDeclareVariable(float3, texcoord, attribute texcoord, ); 
-rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, ); 
-rtDeclareVariable(float3, shading_normal, attribute shading_normal, ); 
+rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
 
 RT_PROGRAM void discIntersect(int) {
   // See Wikipedia:
@@ -36,8 +32,7 @@ RT_PROGRAM void discIntersect(int) {
           && isectToOriginDist >= radiusInner) {
         // In the disc.
         if (rtPotentialIntersection(d)) {
-          texcoord = make_float3(0);
-          geometric_normal = shading_normal = normal;
+          isectNormal = normal;
           rtReportIntersection(0);
         }
       }

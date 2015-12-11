@@ -6,15 +6,20 @@
 #include <boost/format.hpp>
 
 class Geom {
-  optix::Material _material;
+  bool _frozen;
 
 protected:
   mutable optix::Context _ctx;
-  std::string getPtxFileName(std::string cuFile) const;
+  optix::Geometry _geom;
+
+  virtual unsigned getPrimitiveCount() const = 0;
+  virtual std::string getPtxFile() const = 0;
+  virtual std::string getIsectProgram() const = 0;
+  virtual std::string getBoundsProgram() const = 0;
+  void freeze();
 
 public:
   Geom(optix::Context ctx);
   virtual ~Geom();
-  virtual optix::Geometry makeOptixGeometry() const = 0;
-  optix::GeometryInstance makeInstance() const;
+  optix::Geometry getGeometry() const;
 };

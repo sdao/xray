@@ -3,19 +3,38 @@
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
 
-Mesh::Mesh(optix::Context ctx, optix::float3 origin, std::string name) : Geom(ctx), _origin(origin) {
+Mesh::Mesh(Xray xray, optix::float3 origin, std::string name) : Geom(xray.getContext()), _origin(origin) {
   readPolyModel(name);
+
+  _geom["vertexBuffer"]->setBuffer(_vertices);
+  _geom["normalBuffer"]->setBuffer(_normals);
+  _geom["faceIndices"]->setBuffer(_faces);
+
+  freeze();
 }
 
-optix::Geometry Mesh::makeOptixGeometry() const {
-  optix::Geometry geom = _ctx->createGeometry();
-  geom->setPrimitiveCount(_numFaces);
-  geom->setIntersectionProgram(_ctx->createProgramFromPTXFile(getPtxFileName("triangle_mesh.cu"), "meshIntersect"));
-  geom->setBoundingBoxProgram(_ctx->createProgramFromPTXFile(getPtxFileName("triangle_mesh.cu"), "meshBounds"));
-  geom["vertexBuffer"]->setBuffer(_vertices);
-  geom["normalBuffer"]->setBuffer(_normals);
-  geom["faceIndices"]->setBuffer(_faces);
-  return geom;
+Mesh* Mesh::make(Xray xray, const Node& n) {
+  return new Mesh(
+    xray,
+    n.getFloat3("origin"),
+    n.getString("file")
+  );
+}
+
+unsigned Mesh::getPrimitiveCount() const {
+  return _numFaces;
+}
+
+std::string Mesh::getPtxFile() const {
+  return "PTX_files/triangle_mesh.cu.ptx";
+}
+
+std::string Mesh::getIsectProgram() const {
+  return "meshIntersect";
+}
+
+std::string Mesh::getBoundsProgram() const {
+  return "meshBounds";
 }
 
 void Mesh::readPolyModel(std::string name) {
