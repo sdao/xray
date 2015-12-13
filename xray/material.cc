@@ -1,5 +1,5 @@
 #include "material.h"
-#include "CUDA_files/core.cuh"
+#include "CUDA_files/shared.cuh"
 
 Material::Material(optix::Context ctx) : _ctx(ctx), _material(ctx->createMaterial()) {}
 

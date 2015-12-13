@@ -17,5 +17,6 @@ RT_PROGRAM void normalTestRadiance()
   n.x = fabsf(n.x);
   n.y = fabsf(n.y);
   n.z = fabsf(n.z);
-	normalRayData.radiance = n;
+	normalRayData.radiance += n * normalRayData.beta;
+  normalRayData.beta = make_float3(0);
 }

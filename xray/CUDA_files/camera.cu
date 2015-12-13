@@ -3,10 +3,8 @@
 #include <optixu/optixu_math_namespace.h>
 #include <optixu/optixu_matrix_namespace.h>
 #include <optixu/optixu_aabb_namespace.h>
-#include <curand_kernel.h>
 #include "math.cuh"
 #include "core.cuh"
-#include "sampling.cuh"
 
 enum Sample {
   SAMPLE_RADIANCE = 0,
@@ -30,9 +28,37 @@ rtBuffer<uchar4, 2> imageBuffer;
 rtDeclareVariable(uint2, launchIndex, rtLaunchIndex, );
 rtDeclareVariable(uint2, launchDim, rtLaunchDim, );
 
+/**
+  * The number of bounces at which a ray is subject to Russian Roulette
+  * termination, stage 1 (less aggressive).
+  */
+#define RUSSIAN_ROULETTE_DEPTH_1 5
+
+/**
+  * The number of bounces at which a ray is subject to Russian Roulette
+  * termination, stage 2 (more aggressive).
+  */
+#define RUSSIAN_ROULETTE_DEPTH_2 50
+
+/**
+  * Limits any given sample to the given amount of radiance. This helps to
+  * reduce "fireflies" in the output. The lower this value, the more bias will
+  * be introduced into the image. For unbiased rendering, set this to
+  * std::numeric_limits<float>::max().
+  */
+#define BIASED_RADIANCE_CLAMPING 50.0
+
+#define FILTER_WIDTH 2.0f
+
 RT_PROGRAM void camera() {
   curandState rngState;
   curand_init((frameNumber * launchDim.x * launchDim.y) + (launchIndex.x * launchDim.y) + launchIndex.y, 0, 0, &rngState);
+  
+  float offsetY = math::nextFloat(&rngState, -FILTER_WIDTH, FILTER_WIDTH);
+  float offsetX = math::nextFloat(&rngState, -FILTER_WIDTH, FILTER_WIDTH);
+
+  float posX = float(launchIndex.x) + offsetX;
+  float posY = float(launchIndex.y) + offsetY;
 
   float fracX = float(launchIndex.x) / float(launchDim.x - 1);
   float fracY = float(launchIndex.y) / float(launchDim.y - 1);
@@ -41,33 +67,83 @@ RT_PROGRAM void camera() {
   float3 lookAt = focalPlaneOrigin + offset;
 
   float3 eye = make_float3(0, 0, 0);
-  sampling::areaSampleDisk(&rngState, &eye.x, &eye.y);
+  math::areaSampleDisk(&rngState, &eye.x, &eye.y);
   eye = lensRadius * eye;
 
   float3 eyeWorld = math::pointXform(eye, xform);
   float3 lookAtWorld = math::pointXform(lookAt, xform);
   float3 dir = normalize(lookAtWorld - eyeWorld);
-  
-  optix::Ray ray = make_Ray(eyeWorld, dir, RAY_TYPE_NORMAL, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
 
-  NormalRayData data = NormalRayData::make();
-  rtTrace(sceneRoot, ray, data);
+  NormalRayData data = NormalRayData::make(eyeWorld, dir, &rngState);
+  for (int depth = 0; ; ++depth) {
+    optix::Ray ray = make_Ray(data.origin, data.direction, RAY_TYPE_NORMAL, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
+    rtTrace(sceneRoot, ray, data);
+
+    // Do Russian Roulette if this path is "old".
+    if (depth >= RUSSIAN_ROULETTE_DEPTH_1 || math::isNearlyZero(data.beta)) {
+      float rv = math::nextFloat(&rngState, 0.0f, 1.0f);
+
+      float probLive;
+      if (depth >= RUSSIAN_ROULETTE_DEPTH_2) {
+        // More aggressive ray killing when ray is very old.
+        probLive = math::clampedLerp(0.25f, 0.75f, luminanceCIE(data.beta));
+      } else {
+        // Less aggressive ray killing.
+        probLive = math::clampedLerp(0.25f, 1.00f, luminanceCIE(data.beta));
+      }
+
+      if (rv < probLive) {
+        // The ray lives (more energy = more likely to live).
+        // Increase its energy to balance out probabilities.
+        data.beta = data.beta / probLive;
+      } else {
+        // The ray dies.
+        break;
+      }
+    }
+  }
+
+  data.radiance = make_float3(
+    math::clamp(data.radiance.x, 0.0f, BIASED_RADIANCE_CLAMPING),
+    math::clamp(data.radiance.y, 0.0f, BIASED_RADIANCE_CLAMPING),
+    math::clamp(data.radiance.z, 0.0f, BIASED_RADIANCE_CLAMPING)
+  );
 
   rawBuffer[make_uint3(SAMPLE_RADIANCE, launchIndex.x, launchIndex.y)] = data.radiance;
-  rawBuffer[make_uint3(SAMPLE_POSITION, launchIndex.x, launchIndex.y)] = make_float3(launchIndex.x, launchIndex.y, 0);
+  rawBuffer[make_uint3(SAMPLE_POSITION, launchIndex.x, launchIndex.y)] = make_float3(posX, posY, 0);
 }
 
 RT_PROGRAM void commit() {
-  float3 newRadiance = rawBuffer[make_uint3(SAMPLE_RADIANCE, launchIndex.x, launchIndex.y)];
-  float3 newPosition = rawBuffer[make_uint3(SAMPLE_POSITION, launchIndex.x, launchIndex.y)];
+  float posX = launchIndex.x;
+  float posY = launchIndex.y;
 
+  int minX = math::clampAny(int(ceilf(posX - FILTER_WIDTH)), 0, int(launchDim.x - 1));
+  int maxX = math::clampAny(int(floorf(posX + FILTER_WIDTH)), 0, int(launchDim.x - 1));
+  int minY = math::clampAny(int(ceilf(posY - FILTER_WIDTH)), 0, int(launchDim.y - 1));
+  int maxY = math::clampAny(int(floorf(posY + FILTER_WIDTH)), 0, int(launchDim.y - 1));
+  
   float4 currentAccum = accumBuffer[launchIndex];
-  currentAccum = make_float4(
-    currentAccum.x + newRadiance.x,
-    currentAccum.y + newRadiance.y,
-    currentAccum.z + newRadiance.z,
-    currentAccum.w + 1.0f
-  );
+
+  for (int yy = minY; yy <= maxY; ++yy) {
+    for (int xx = minX; xx <= maxX; ++xx) {
+      float3 newRadiance = rawBuffer[make_uint3(SAMPLE_RADIANCE, xx, yy)];
+      float3 newPosition = rawBuffer[make_uint3(SAMPLE_POSITION, xx, yy)];
+
+      float weight = math::mitchellFilter(
+        posX - newPosition.x,
+        posY - newPosition.y,
+        FILTER_WIDTH
+      );
+
+      if (weight > XRAY_EXTREMELY_SMALL) {
+        currentAccum.x += newRadiance.x * weight;
+        currentAccum.y += newRadiance.y * weight;
+        currentAccum.z += newRadiance.z * weight;
+        currentAccum.w += weight;
+      }
+    }
+  }
+
   accumBuffer[launchIndex] = currentAccum;
   float3 color = make_float3(currentAccum.x, currentAccum.y, currentAccum.z) / currentAccum.w;
 

@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "material.h"
 #include "normaltest.h"
+#include "lambert.h"
 #include "geom.h"
 #include "disc.h"
 #include "sphere.h"
@@ -86,9 +87,9 @@ void Scene::readMats(const ptree& root) {
     if (type == "dielectric") {
       return NormalTest::make(xray, n);
     } else if (type == "lambert") {
-      return NormalTest::make(xray, n);
+      return Lambert::make(xray, n);
     } else if (type == "phong") {
-      return NormalTest::make(xray, n);
+      return new Lambert(xray, optix::make_float3(0, 0, 1));
     } else {
       throw std::runtime_error(type + " is not a recognized type");
     }

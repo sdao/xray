@@ -8,10 +8,12 @@ rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
 
 RT_PROGRAM void miss()
 {
-  normalRayData.radiance = backgroundColor;
+  normalRayData.radiance += backgroundColor * normalRayData.beta;
+  normalRayData.beta = make_float3(0);
 }
 
 RT_PROGRAM void constantRadiance()
 {
-  normalRayData.radiance = backgroundColor;
+  normalRayData.radiance += backgroundColor * normalRayData.beta;
+  normalRayData.beta = make_float3(0);
 }

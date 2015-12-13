@@ -9,7 +9,7 @@ Instance::Instance(Xray xray, const Geom* g, const Material* m)
       _instance->setMaterial(0, m->getMaterial());
     } else {
       _instance->setMaterialCount(1);
-      _instance->setMaterial(0, Constant(xray, optix::make_float3(0)).getMaterial());
+      _instance->setMaterial(0, Constant(xray, optix::make_float3(12)).getMaterial());
     }
 }
 
