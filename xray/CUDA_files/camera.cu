@@ -19,11 +19,14 @@ rtDeclareVariable(float, focalPlaneRight, , ); // The vector pointing from the u
 rtDeclareVariable(float, focalPlaneUp, , );
 rtDeclareVariable(float, lensRadius, , );
 rtDeclareVariable(unsigned int, frameNumber, , );
+rtDeclareVariable(float3, backgroundColor, , );
 
 rtDeclareVariable(rtObject, sceneRoot, , );
 rtBuffer<float3, 3> rawBuffer;
 rtBuffer<float4, 2> accumBuffer;
 rtBuffer<uchar4, 2> imageBuffer;
+
+rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
 
 rtDeclareVariable(uint2, launchIndex, rtLaunchIndex, );
 rtDeclareVariable(uint2, launchDim, rtLaunchDim, );
@@ -79,8 +82,13 @@ RT_PROGRAM void camera() {
     optix::Ray ray = make_Ray(data.origin, data.direction, RAY_TYPE_NORMAL, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
     rtTrace(sceneRoot, ray, data);
 
+    // End path if the beta is black, since no point in continuing.
+    if (math::isNearlyZero(data.beta)) {
+      break;
+    }
+
     // Do Russian Roulette if this path is "old".
-    if (depth >= RUSSIAN_ROULETTE_DEPTH_1 || math::isNearlyZero(data.beta)) {
+    if (depth >= RUSSIAN_ROULETTE_DEPTH_1) {
       float rv = math::nextFloat(&rngState, 0.0f, 1.0f);
 
       float probLive;
@@ -117,10 +125,10 @@ RT_PROGRAM void commit() {
   float posX = launchIndex.x;
   float posY = launchIndex.y;
 
-  int minX = math::clampAny(int(ceilf(posX - FILTER_WIDTH)), 0, int(launchDim.x - 1));
-  int maxX = math::clampAny(int(floorf(posX + FILTER_WIDTH)), 0, int(launchDim.x - 1));
-  int minY = math::clampAny(int(ceilf(posY - FILTER_WIDTH)), 0, int(launchDim.y - 1));
-  int maxY = math::clampAny(int(floorf(posY + FILTER_WIDTH)), 0, int(launchDim.y - 1));
+  int minX = math::clampAny(int(floorf(posX - FILTER_WIDTH)), 0, int(launchDim.x - 1));
+  int maxX = math::clampAny(int(ceilf(posX + FILTER_WIDTH)), 0, int(launchDim.x - 1));
+  int minY = math::clampAny(int(floorf(posY - FILTER_WIDTH)), 0, int(launchDim.y - 1));
+  int maxY = math::clampAny(int(ceilf(posY + FILTER_WIDTH)), 0, int(launchDim.y - 1));
   
   float4 currentAccum = accumBuffer[launchIndex];
 
@@ -129,13 +137,13 @@ RT_PROGRAM void commit() {
       float3 newRadiance = rawBuffer[make_uint3(SAMPLE_RADIANCE, xx, yy)];
       float3 newPosition = rawBuffer[make_uint3(SAMPLE_POSITION, xx, yy)];
 
-      float weight = math::mitchellFilter(
-        posX - newPosition.x,
-        posY - newPosition.y,
-        FILTER_WIDTH
-      );
+      if (fabsf(posX - newPosition.x) <= FILTER_WIDTH && fabsf(posY - newPosition.y) <= FILTER_WIDTH) {
+        float weight = math::mitchellFilter(
+          posX - newPosition.x,
+          posY - newPosition.y,
+          FILTER_WIDTH
+        );
 
-      if (weight > XRAY_EXTREMELY_SMALL) {
         currentAccum.x += newRadiance.x * weight;
         currentAccum.y += newRadiance.y * weight;
         currentAccum.z += newRadiance.z * weight;
@@ -147,9 +155,23 @@ RT_PROGRAM void commit() {
   accumBuffer[launchIndex] = currentAccum;
   float3 color = make_float3(currentAccum.x, currentAccum.y, currentAccum.z) / currentAccum.w;
 
-  imageBuffer[launchIndex] = math::colorToRgba(color);
+  imageBuffer[launchIndex] = math::colorToBgra(color);
 }
 
 RT_PROGRAM void init() {
   accumBuffer[launchIndex] = make_float4(0);
+}
+
+RT_PROGRAM void miss() {
+  /*
+  if (math::isNaN(normalRayData.radiance)) {
+    normalRayData.radiance = make_float3(1000000, 0, 1000000);
+  }
+  */
+
+  normalRayData.radiance += backgroundColor * normalRayData.beta;
+
+  
+
+  normalRayData.beta = make_float3(0);
 }

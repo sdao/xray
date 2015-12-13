@@ -70,6 +70,21 @@ optix::float3 Node::getFloat3(std::string key) const {
   return *result;
 }
 
+const AreaLight* Node::getLight(std::string key) const {
+  const Node::NodeLookupTranslator<const AreaLight*> t(container.lights);
+  auto result =
+    attributes.get_optional<const AreaLight*, Node::NodeLookupTranslator<const AreaLight*>>(key, t);
+
+  if (!result) {
+    const std::string itemName = attributes.get<std::string>(key);
+    const std::string msg =
+      "Cannot resolve light reference '%1%' in property '%2%'";
+    throw std::runtime_error(str(format(msg) % itemName % key));
+  }
+
+  return *result;
+}
+
 const Material* Node::getMaterial(std::string key) const {
   const Node::NodeLookupTranslator<const Material*> t(container.materials);
   auto result =

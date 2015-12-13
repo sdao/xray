@@ -7,9 +7,6 @@
     <CudaCompile Include="CUDA_files\sphere.cu">
       <Filter>CUDA_files\geoms</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\triangle_mesh.cu">
-      <Filter>CUDA_files\geoms</Filter>
-    </CudaCompile>
     <CudaCompile Include="CUDA_files\camera.cu">
       <Filter>CUDA_files</Filter>
     </CudaCompile>
@@ -23,6 +20,15 @@
       <Filter>CUDA_files\materials</Filter>
     </CudaCompile>
     <CudaCompile Include="CUDA_files\lambert.cu">
+      <Filter>CUDA_files\materials</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\dielectric.cu">
+      <Filter>CUDA_files\materials</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\mesh.cu">
+      <Filter>CUDA_files\geoms</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\phong.cu">
       <Filter>CUDA_files\materials</Filter>
     </CudaCompile>
   </ItemGroup>
@@ -52,6 +58,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.variables_map.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.winmain.cpp" />
     <ClCompile Include="lambert.cc" />
+    <ClCompile Include="light.cc" />
+    <ClCompile Include="dielectric.cc" />
+    <ClCompile Include="phong.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="optix_helpers.h">
@@ -75,13 +84,22 @@
     <ClInclude Include="scene.h" />
     <ClInclude Include="xray.h" />
     <ClInclude Include="constant.h" />
-    <ClInclude Include="CUDA_files\basematerial.h">
-      <Filter>CUDA_files\materials</Filter>
-    </ClInclude>
     <ClInclude Include="CUDA_files\shared.cuh">
       <Filter>CUDA_files</Filter>
     </ClInclude>
     <ClInclude Include="lambert.h" />
+    <ClInclude Include="CUDA_files\light.cuh">
+      <Filter>CUDA_files</Filter>
+    </ClInclude>
+    <ClInclude Include="light.h" />
+    <ClInclude Include="CUDA_files\basematerial.cuh">
+      <Filter>CUDA_files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="CUDA_files\bsdf.cuh">
+      <Filter>CUDA_files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="dielectric.h" />
+    <ClInclude Include="phong.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

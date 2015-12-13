@@ -13,5 +13,5 @@ std::string NormalTest::getClosestHitPtxFile() const {
 }
 
 std::string NormalTest::getClosestHitProgram() const {
-  return "normalTestRadiance";
+  return "radiance";
 }

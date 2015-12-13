@@ -143,15 +143,18 @@ if not exist "$(ProjectDir)PTX_files" mkdir "$(ProjectDir)PTX_files"</Command>
   <ItemGroup>
     <ClCompile Include="camera.cc" />
     <ClCompile Include="constant.cc" />
+    <ClCompile Include="dielectric.cc" />
     <ClCompile Include="disc.cc" />
     <ClCompile Include="geom.cc" />
     <ClCompile Include="instance.cc" />
     <ClCompile Include="lambert.cc" />
+    <ClCompile Include="light.cc" />
     <ClCompile Include="main.cc" />
     <ClCompile Include="material.cc" />
     <ClCompile Include="mesh.cc" />
     <ClCompile Include="node.cc" />
     <ClCompile Include="normaltest.cc" />
+    <ClCompile Include="phong.cc" />
     <ClCompile Include="scene.cc" />
     <ClCompile Include="sphere.cc" />
     <ClCompile Include="xray.cc" />
@@ -203,6 +206,24 @@ if not exist "$(ProjectDir)PTX_files" mkdir "$(ProjectDir)PTX_files"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling constantbg.cu into constantbg.cu.ptx...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">constantbg.cu.ptx</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.0/bin/nvcc.exe" "CUDA_files/constantbg.cu" -ptx -o "PTX_files/constantbg.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.8.0/include"</Command>
+      <FileType>Document</FileType>
+      <CompileOut Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)PTX_files\%(Filename)%(Extension).ptx</CompileOut>
+      <Include Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Include>
+      <CodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </CodeGeneration>
+      <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</GPUDebugInfo>
+      <MaxRegCount Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </MaxRegCount>
+      <HostDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</HostDebugInfo>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\dielectric.cu">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.0/bin/nvcc.exe" "CUDA_files/dielectric.cu" -ptx -o "PTX_files/dielectric.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.8.0/include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling dielectric.cu into dielectric.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">dielectric.cu.ptx</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling dielectric.cu into dielectric.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">dielectric.cu.ptx</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.0/bin/nvcc.exe" "CUDA_files/dielectric.cu" -ptx -o "PTX_files/dielectric.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.8.0/include"</Command>
       <FileType>Document</FileType>
       <CompileOut Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)PTX_files\%(Filename)%(Extension).ptx</CompileOut>
       <Include Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -269,6 +290,23 @@ if not exist "$(ProjectDir)PTX_files" mkdir "$(ProjectDir)PTX_files"</Command>
       </MaxRegCount>
       <HostDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</HostDebugInfo>
     </CudaCompile>
+    <CudaCompile Include="CUDA_files\phong.cu">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.0/bin/nvcc.exe" "CUDA_files/phong.cu" -ptx -o "PTX_files/phong.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.8.0/include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling phong.cu into phong.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">phong.cu.ptx</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling phong.cu into phong.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">phong.cu.ptx</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.0/bin/nvcc.exe" "CUDA_files/phong.cu" -ptx -o "PTX_files/phong.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.8.0/include"</Command>
+      <CompileOut Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)PTX_files\%(Filename)%(Extension).ptx</CompileOut>
+      <Include Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Include>
+      <CodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </CodeGeneration>
+      <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</GPUDebugInfo>
+      <MaxRegCount Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </MaxRegCount>
+      <HostDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</HostDebugInfo>
+    </CudaCompile>
     <CudaCompile Include="CUDA_files\sphere.cu">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.0/bin/nvcc.exe" "CUDA_files/sphere.cu" -ptx -o "PTX_files/sphere.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.8.0/include"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling sphere.cu into sphere.cu.ptx...</Message>
@@ -286,7 +324,7 @@ if not exist "$(ProjectDir)PTX_files" mkdir "$(ProjectDir)PTX_files"</Command>
       </MaxRegCount>
       <HostDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</HostDebugInfo>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\triangle_mesh.cu">
+    <CudaCompile Include="CUDA_files\mesh.cu">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.0/bin/nvcc.exe" "CUDA_files/triangle_mesh.cu" -ptx -o "PTX_files/triangle_mesh.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.8.0/include"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling triangle_mesh.cu into triangle_mesh.cu.ptx...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">triangle_mesh.cu.ptx</Outputs>
@@ -307,19 +345,24 @@ if not exist "$(ProjectDir)PTX_files" mkdir "$(ProjectDir)PTX_files"</Command>
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="constant.h" />
-    <ClInclude Include="CUDA_files\basematerial.h" />
+    <ClInclude Include="CUDA_files\basematerial.cuh" />
+    <ClInclude Include="CUDA_files\bsdf.cuh" />
     <ClInclude Include="CUDA_files\core.cuh" />
+    <ClInclude Include="CUDA_files\light.cuh" />
     <ClInclude Include="CUDA_files\math.cuh" />
     <ClInclude Include="CUDA_files\shared.cuh" />
+    <ClInclude Include="dielectric.h" />
     <ClInclude Include="disc.h" />
     <ClInclude Include="geom.h" />
     <ClInclude Include="instance.h" />
     <ClInclude Include="lambert.h" />
+    <ClInclude Include="light.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="normaltest.h" />
     <ClInclude Include="optix_helpers.h" />
+    <ClInclude Include="phong.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="xray.h" />

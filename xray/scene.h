@@ -9,6 +9,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include "xray.h"
 
+class AreaLight;
 class Material;
 class Instance;
 class Camera;
@@ -19,7 +20,9 @@ class Scene {
 
   /** Root Xray context. */
   Xray _xray;
-
+  
+  /** Lights read from scene file. */
+  std::map<std::string, const AreaLight*> lights;
   /** Materials read from scene file. */
   std::map<std::string, const Material*> materials;
   /** Geometry instances read from file. */
@@ -46,6 +49,8 @@ class Scene {
     const std::function<T(Xray xray, const Node&, std::string type)> lookup,
     std::map<std::string, T>& storage
   );
+  /** Reads all of the lights in the given property tree. */
+  void readLights(const boost::property_tree::ptree& root);
   /** Reads all of the materials in the given property tree. */
   void readMats(const boost::property_tree::ptree& root);
   /** Reads all of the geometry in the given property tree. */

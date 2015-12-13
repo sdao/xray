@@ -4,38 +4,24 @@
 #include "core.cuh"
 #include "math.cuh"
 #include "shared.cuh"
+#include "basematerial.cuh"
 
 using namespace optix;
 
 rtDeclareVariable(float3, albedo, , ); 
 
-rtDeclareVariable(Ray, ray, rtCurrentRay, );
-rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
-rtDeclareVariable(float, isectDist, rtIntersectionDistance, );
-rtDeclareVariable(float3, isectNormal, attribute isectNormal, ); 
-
-__device__ float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
-  if (!math::localSameHemisphere(incoming, outgoing)) {
-    return make_float3(0);
-  }
-
-  return albedo * XRAY_INV_PI;
-}
+__device__ float3 evalBSDFLocal(const float3& incoming, const float3& outgoing);
 
 __device__ void sampleLocal(
+  curandState* rng,
   const float3& incoming,
   float3* outgoingOut,
   float3* bsdfOut,
   float* pdfOut
-) {
-  float3 outgoing = math::cosineSampleHemisphere(normalRayData.rng, incoming.z < 0.0f);
-
-  *outgoingOut = outgoing;
-  *bsdfOut = evalBSDFLocal(incoming, outgoing);
-  *pdfOut = math::cosineSampleHemispherePDF(outgoing);
-}
+);
 
 __device__ void sampleWorld(
+  curandState* rng,
   const float3& isectNormalObj,
   const float3& incoming,
   float3* outgoingOut,
@@ -58,7 +44,7 @@ __device__ void sampleWorld(
   float3 outgoingLocal;
   float3 tempBsdf;
   float tempPdf;
-  sampleLocal(incomingLocal, &outgoingLocal, &tempBsdf, &tempPdf);
+  sampleLocal(rng, incomingLocal, &outgoingLocal, &tempBsdf, &tempPdf);
 
   // Rendering expects outgoing ray to be in world-space.
   float3 outgoingWorld = math::localToWorld(
@@ -73,23 +59,20 @@ __device__ void sampleWorld(
   *pdfOut = tempPdf;
 }
 
-RT_PROGRAM void radiance() {
-  float3 isectNormalObj = rtTransformNormal(RT_OBJECT_TO_WORLD, isectNormal); 
-  float3 isectPos = normalRayData.origin + normalRayData.direction * isectDist;
-
+__device__ void scatter(NormalRayData& rayData, float3 normal, float3 pos) {
   float3 outgoingWorld;
   float3 bsdf;
   float pdf;
-  sampleWorld(isectNormalObj, -normalRayData.direction, &outgoingWorld, &bsdf, &pdf);
+  sampleWorld(rayData.rng, normal, -rayData.direction, &outgoingWorld, &bsdf, &pdf);
 
   float3 scale;
   if (pdf > 0.0f) {
-    scale = bsdf * fabsf(dot(isectNormalObj, outgoingWorld)) / pdf;
+    scale = bsdf * fabsf(dot(normal, outgoingWorld)) / pdf;
   } else {
     scale = make_float3(0, 0, 0);
   }
 
-  normalRayData.origin = isectPos + outgoingWorld * XRAY_VERY_SMALL;
-  normalRayData.direction = outgoingWorld;
-  normalRayData.beta *= scale;
+  rayData.origin = pos + outgoingWorld * XRAY_VERY_SMALL;
+  rayData.direction = outgoingWorld;
+  rayData.beta *= scale;
 }

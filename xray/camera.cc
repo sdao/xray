@@ -48,7 +48,7 @@ Camera::Camera(
   _cam["focalPlaneUp"]->setFloat(_focalPlaneUp);
   _cam["lensRadius"]->setFloat(_lensRadius);
 
-  _miss = _ctx->createProgramFromPTXFile("PTX_files/constant.cu.ptx", "miss");
+  _miss = _ctx->createProgramFromPTXFile("PTX_files/camera.cu.ptx", "miss");
   _miss["backgroundColor"]->setFloat(0, 0, 0);
 
   _commit = _ctx->createProgramFromPTXFile("PTX_files/camera.cu.ptx", "commit");

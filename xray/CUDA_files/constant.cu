@@ -2,18 +2,11 @@
 #include <optix_cuda.h>
 #include <optix_world.h>
 #include "core.cuh"
+#include "basematerial.cuh"
 
-rtDeclareVariable(float3, backgroundColor, , );
-rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
+rtDeclareVariable(float3, color, , );
 
-RT_PROGRAM void miss()
-{
-  normalRayData.radiance += backgroundColor * normalRayData.beta;
-  normalRayData.beta = make_float3(0);
-}
-
-RT_PROGRAM void constantRadiance()
-{
-  normalRayData.radiance += backgroundColor * normalRayData.beta;
-  normalRayData.beta = make_float3(0);
+__device__ void scatter(NormalRayData& rayData, float3 normal, float3 pos) {
+  rayData.radiance += color * rayData.beta;
+  rayData.beta = make_float3(0);
 }

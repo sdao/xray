@@ -1,7 +1,7 @@
 #include "constant.h"
 
 Constant::Constant(Xray xray, optix::float3 color) : Material(xray.getContext()) {
-  _material["backgroundColor"]->set3fv(&color.x);
+  _material["color"]->set3fv(&color.x);
   freeze();
 }
 
@@ -14,5 +14,5 @@ std::string Constant::getClosestHitPtxFile() const {
 }
 
 std::string Constant::getClosestHitProgram() const {
-  return "constantRadiance";
+  return "radiance";
 }

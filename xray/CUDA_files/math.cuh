@@ -93,11 +93,11 @@ namespace math {
     return x < 0 ? 0 : (x > 1 ? 1 : x);
   }
 
-  __device__ __inline__ uchar4 colorToRgba(const float3& c) {
+  __device__ __inline__ uchar4 colorToBgra(const float3& c) {
     return optix::make_uchar4(
-      static_cast<unsigned char>(saturate(c.x) * 255.99f), /* R */
-      static_cast<unsigned char>(saturate(c.y) * 255.99f), /* G */
       static_cast<unsigned char>(saturate(c.z) * 255.99f), /* B */
+      static_cast<unsigned char>(saturate(c.y) * 255.99f), /* G */
+      static_cast<unsigned char>(saturate(c.x) * 255.99f), /* R */
       255u /* A */
     );                                                 
   }
@@ -294,6 +294,14 @@ namespace math {
    */
   __device__ __inline__ float mitchellFilter(float x, float y, float width = 2.0f) {
     return mitchellFilter(x / width) * mitchellFilter(y / width);
+  }
+
+  __device__ __inline__ float squaredNorm(const float3& v) {
+    return v.x * v.x + v.y * v.y + v.z * v.z;
+  }
+
+  __device__ __inline__ bool isNaN(const float3& v) {
+    return (v.x != v.x) | (v.y != v.y) | (v.z != v.z);
   }
 
 }

@@ -2,11 +2,14 @@
 #include "camera.h"
 #include "material.h"
 #include "normaltest.h"
+#include "dielectric.h"
 #include "lambert.h"
+#include "phong.h"
 #include "geom.h"
 #include "disc.h"
 #include "sphere.h"
 #include "mesh.h"
+#include "light.h"
 #include "node.h"
 #include <exception>
 #include <boost/format.hpp>
@@ -21,6 +24,7 @@ Scene::Scene(std::string jsonFile)
     ptree pt;
     read_json(jsonFile, pt);
     
+    readLights(pt);
     readMats(pt);
     readGeomInstances(pt);
     readCameras(pt);
@@ -82,14 +86,26 @@ void Scene::readMultiple(
   }
 }
 
+void Scene::readLights(const ptree& root) {
+  static auto lookup = [](Xray xray, const Node& n, std::string type) -> const AreaLight* {
+    if (type == "area") {
+      return AreaLight::make(xray, n);
+    } else {
+      throw std::runtime_error(type + " is not a recognized type");
+    }
+  };
+
+  readMultiple<const AreaLight*>(root, "lights", lookup, lights);
+}
+
 void Scene::readMats(const ptree& root) {
   static auto lookup = [](Xray xray, const Node& n, std::string type) -> const Material* {
     if (type == "dielectric") {
-      return NormalTest::make(xray, n);
+      return Dielectric::make(xray, n);
     } else if (type == "lambert") {
       return Lambert::make(xray, n);
     } else if (type == "phong") {
-      return new Lambert(xray, optix::make_float3(0, 0, 1));
+      return Phong::make(xray, n);
     } else {
       throw std::runtime_error(type + " is not a recognized type");
     }
@@ -110,7 +126,7 @@ void Scene::readGeomInstances(const ptree& root) {
     } else {
       throw std::runtime_error(type + " is not a recognized type");
     }
-    const Instance* instance = new Instance(xray, g, n.getMaterial("mat"));
+    const Instance* instance = new Instance(xray, g, n.getMaterial("mat"), n.getLight("light"));
     delete g;
     return instance;
   };

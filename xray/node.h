@@ -6,6 +6,7 @@
 #include <map>
 #include <boost/property_tree/ptree.hpp>
 
+class AreaLight;
 class Material;
 class Instance;
 class Scene;
@@ -57,6 +58,8 @@ public:
   float getFloat(std::string key) const;
   /** Gets the 3D vector property at the given key. */
   optix::float3 getFloat3(std::string key) const;
+  /** Gets the light pointer referenced by the given key. */
+  const AreaLight* getLight(std::string key) const;
   /** Gets the material pointer referenced by the given key. */
   const Material* getMaterial(std::string key) const;
   /** Gets the geom instance pointer referenced by the given key. */
