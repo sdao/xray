@@ -26,7 +26,7 @@ unsigned Mesh::getPrimitiveCount() const {
 }
 
 std::string Mesh::getPtxFile() const {
-  return "PTX_files/triangle_mesh.cu.ptx";
+  return "PTX_files/mesh.cu.ptx";
 }
 
 std::string Mesh::getIsectProgram() const {

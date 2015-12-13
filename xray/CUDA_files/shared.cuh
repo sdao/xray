@@ -10,6 +10,8 @@
 #define XRAY_PI_4 0.7853981633974483f
 /** 1/Pi as a float. */
 #define XRAY_INV_PI 0.3183098861837907f
+/** 1/Pi as a float. */
+#define XRAY_TWO_PI 6.2831853071795865f
 
 enum RayTypes {
   RAY_TYPE_NORMAL = 0,
