@@ -58,11 +58,11 @@ namespace math {
 #endif
   }
 
-  __host__ __device__ __inline__ optix::uchar4 colorToBgra(const optix::float3& c) {
+  __host__ __device__ __inline__ optix::uchar4 colorToRgba(const optix::float3& c) {
     return optix::make_uchar4(
-      static_cast<unsigned char>(saturate(c.z) * 255.99f), /* B */
-      static_cast<unsigned char>(saturate(c.y) * 255.99f), /* G */
       static_cast<unsigned char>(saturate(c.x) * 255.99f), /* R */
+      static_cast<unsigned char>(saturate(c.y) * 255.99f), /* G */
+      static_cast<unsigned char>(saturate(c.z) * 255.99f), /* B */
       255u /* A */
     );                                                 
   }

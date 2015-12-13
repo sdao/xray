@@ -15,7 +15,8 @@ Camera::Camera(
     _lensRadius((len / fStop) * 0.5f), // Diameter = focalLength / fStop.
     _camToWorldXform(xform),
     _w(ww), _h(hh),
-    _objs(objs)
+    _objs(objs),
+    _frame(0)
 {
   // Calculate ray-tracing vectors.
   float halfFocalPlaneUp;
@@ -34,8 +35,10 @@ Camera::Camera(
   _focalPlaneOrigin = optix::make_float3(-halfFocalPlaneRight, halfFocalPlaneUp, -_focalLength);
   
   // Set up OptiX image buffers.
-  _raw = _ctx->createBuffer(RT_BUFFER_OUTPUT, RT_FORMAT_FLOAT3, ww, hh);
+  _raw = _ctx->createBuffer(RT_BUFFER_OUTPUT, RT_FORMAT_FLOAT3, 2, ww, hh);
+  _accum = _ctx->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, ww, hh);
   _image = _ctx->createBuffer(RT_BUFFER_OUTPUT, RT_FORMAT_UNSIGNED_BYTE4, ww, hh);
+  _rng = _ctx->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_UNSIGNED_INT, ww, hh);
 
   // Set up OptiX ray and miss programs.
   _cam = _ctx->createProgramFromPTXFile("PTX_files/camera.cu.ptx", "camera");
@@ -43,9 +46,13 @@ Camera::Camera(
   _cam["focalPlaneOrigin"]->set3fv(&_focalPlaneOrigin.x);
   _cam["focalPlaneRight"]->setFloat(_focalPlaneRight);
   _cam["focalPlaneUp"]->setFloat(_focalPlaneUp);
+  _cam["lensRadius"]->setFloat(_lensRadius);
 
   _miss = _ctx->createProgramFromPTXFile("PTX_files/constant.cu.ptx", "miss");
   _miss["backgroundColor"]->setFloat(0, 0, 0);
+
+  _commit = _ctx->createProgramFromPTXFile("PTX_files/camera.cu.ptx", "commit");
+  _init = _ctx->createProgramFromPTXFile("PTX_files/camera.cu.ptx", "init");
 }
 
 Camera::~Camera() {
@@ -63,15 +70,31 @@ Camera* Camera::make(Xray xray, const Node& n) {
   );
 }
 
-optix::Buffer Camera::getImageBuffer() {
+optix::Buffer Camera::imageBuffer() {
   return _image;
 }
 
-void Camera::render() {
+int Camera::pixelWidth() const {
+  return _w;
+}
+
+int Camera::pixelHeight() const {
+  return _h;
+}
+
+unsigned int Camera::frameNumber() const {
+  return _frame;
+}
+
+void Camera::prepare() {
   // Associate camera programs/buffers.
   _ctx["rawBuffer"]->setBuffer(_raw);
+  _ctx["accumBuffer"]->setBuffer(_accum);
   _ctx["imageBuffer"]->setBuffer(_image);
-  _ctx->setRayGenerationProgram(0, _cam);
+  _ctx["rngBuffer"]->setBuffer(_rng);
+  _ctx->setRayGenerationProgram(CAMERA_TRACE, _cam);
+  _ctx->setRayGenerationProgram(CAMERA_COMMIT, _commit);
+  _ctx->setRayGenerationProgram(CAMERA_INIT, _init);
   _ctx->setMissProgram(0, _miss);
 
   // Set up acceleration structures.
@@ -90,5 +113,12 @@ void Camera::render() {
   // Validate, compile, and run.
   _ctx->validate();
   _ctx->compile();
-  _ctx->launch(0, _w, _h);
+  _ctx->launch(CAMERA_INIT, _w, _h);
+}
+
+void Camera::render() {
+  _ctx["frameNumber"]->setUint(_frame);
+  _ctx->launch(CAMERA_TRACE, _w, _h);
+  _ctx->launch(CAMERA_COMMIT, _w, _h);
+  _frame++;
 }

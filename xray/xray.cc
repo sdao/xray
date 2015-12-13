@@ -3,7 +3,7 @@
 Xray::Xray() {
   _ctx = optix::Context::create();
   _ctx->setRayTypeCount(2);
-  _ctx->setEntryPointCount(1);
+  _ctx->setEntryPointCount(3);
 }
 
 Xray::~Xray() {}

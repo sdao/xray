@@ -16,11 +16,11 @@
     <CudaCompile Include="CUDA_files\anyhit.cu">
       <Filter>CUDA_files</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\normaltest.cu">
-      <Filter>CUDA_files</Filter>
-    </CudaCompile>
     <CudaCompile Include="CUDA_files\constant.cu">
-      <Filter>CUDA_files</Filter>
+      <Filter>CUDA_files\materials</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\normaltest.cu">
+      <Filter>CUDA_files\materials</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
@@ -37,6 +37,17 @@
     <ClCompile Include="xray.cc" />
     <ClCompile Include="main.cc" />
     <ClCompile Include="constant.cc" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.cmdline.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.config_file.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.convert.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.options_description.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.parsers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.positional_options.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.split.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.utf8_codecvt_facet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.value_semantic.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.variables_map.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.winmain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="optix_helpers.h">
@@ -60,6 +71,12 @@
     <ClInclude Include="scene.h" />
     <ClInclude Include="xray.h" />
     <ClInclude Include="constant.h" />
+    <ClInclude Include="CUDA_files\basematerial.h">
+      <Filter>CUDA_files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="CUDA_files\sampling.cuh">
+      <Filter>CUDA_files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -79,6 +96,9 @@
     </Filter>
     <Filter Include="CUDA_files\geoms">
       <UniqueIdentifier>{0549cfc3-2387-4bff-a085-78077c139014}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CUDA_files\materials">
+      <UniqueIdentifier>{6a0adde6-3fc4-4f57-a800-607c88df5a61}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

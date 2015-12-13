@@ -1,22 +1,12 @@
+#include <iostream>
+#include <SDL.h>
+#include <boost/program_options.hpp>
 #include "scene.h"
 #include "camera.h"
-#include "optix_helpers.h"
-#include <iostream>
-#include <boost/program_options.hpp>
 
 int main(int argc, char* argv[]) {
   using namespace boost::program_options;
-
-  sUtilWrapper* sUtil;
-  try {
-    sUtil = new sUtilWrapper();
-  } catch (char *err) {
-    cout << err;
-    return 1;
-  }
-
-  sUtil->initGlut(&argc, argv);
-
+ 
   try {
     // Parse command-line args using boost::program_options.
     options_description desc("Allowed options");
@@ -50,8 +40,42 @@ int main(int argc, char* argv[]) {
     std::string output = vars["output"].as<std::string>();
 
     Scene scene(input);
-    scene.defaultCamera()->render();
-    sUtil->DisplayBufferInGlutWindow(scene.getContext()->get(), argv[0], scene.defaultCamera()->getImageBuffer()->get());
+
+    SDL_Init(SDL_INIT_VIDEO);
+    scene.defaultCamera()->prepare();
+
+    SDL_Window* window = SDL_CreateWindow(
+      "xray",
+      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+      scene.defaultCamera()->pixelWidth(), scene.defaultCamera()->pixelHeight(),
+      SDL_WINDOW_SHOWN
+    );
+    SDL_Surface* windowSurface = SDL_GetWindowSurface(window);
+
+    while (true) {
+      SDL_Event event;
+      while (SDL_PollEvent(&event)) {}
+
+      scene.defaultCamera()->render();
+
+      void* imageMapped = scene.defaultCamera()->imageBuffer()->map();
+      SDL_LockSurface(windowSurface);
+      std::memcpy(
+        windowSurface->pixels,
+        imageMapped,
+        scene.defaultCamera()->pixelWidth() * scene.defaultCamera()->pixelHeight() * 4
+      );
+      SDL_UnlockSurface(windowSurface);
+      scene.defaultCamera()->imageBuffer()->unmap();
+      
+      SDL_UpdateWindowSurface(window);
+
+      std::cout << ".";
+      int frameNumber = scene.defaultCamera()->frameNumber();
+      if (frameNumber % 50 == 0) {
+        std::cout << " " << frameNumber << std::endl;
+      }
+    }
   } catch (std::exception& e) {
     std::cout << e.what() << std::endl;
     return 42;

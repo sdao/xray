@@ -2,22 +2,36 @@
 #define NOMINMAX
 #include <optix.h>
 #include <optix_world.h>
+#include <optixu/optixu_math_namespace.h>
+#include <optixu/optixu_matrix_namespace.h>
 #include "CUDA_files/math.cuh"
 #include "instance.h"
 #include "node.h"
 #include "xray.h"
 
+enum CameraMode {
+  CAMERA_TRACE = 0,
+  CAMERA_COMMIT = 1,
+  CAMERA_INIT = 2
+};
+
 class Camera {
   mutable optix::Context _ctx;
   optix::Program _cam;
   optix::Program _miss;
+  optix::Program _commit;
+  optix::Program _init;
   optix::Buffer _raw;
+  optix::Buffer _accum;
   optix::Buffer _image;
+  optix::Buffer _rng;
 
   const std::vector<const Instance*> _objs;
 
   int _w;
   int _h;
+
+  unsigned int _frame;
 
   const float _focalLength; /**< The distance from the eye to the focal plane. */
   const float _lensRadius; /**< The radius of the lens opening. */
@@ -42,7 +56,12 @@ public:
 
   static Camera* make(Xray xray, const Node& n);
 
-  optix::Buffer getImageBuffer();
+  optix::Buffer imageBuffer();
+  int pixelWidth() const;
+  int pixelHeight() const;
+  unsigned int frameNumber() const;
+
+  void prepare();
   void render();
 };
 
