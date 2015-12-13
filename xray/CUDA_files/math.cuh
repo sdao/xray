@@ -27,31 +27,11 @@ namespace math {
   }
 
   /**
-   * Linearly interpolates between x and y. Where a = 0, x is returned, and
-   * where a = 1, y is returned. If a < 0 or a > 1, this function will
-   * extrapolate.
-   */
-  __device__ __inline__ float lerp(float x, float y, float a) {
-    return x + a * (y - x);
-  }
-
-  /** Clamps a value x between a and b. */
-  __device__ __inline__ float clamp(float x, float a = 0.0f, float b = 1.0f) {
-    return x < a ? a : (x > b ? b : x);
-  }
-
-  /** Clamps a value x between a and b. */
-  template< class T >
-  __device__ __inline__ T clampAny(T x, T a, T b) {
-    return x < a ? a : (x > b ? b : x);
-  }
-
-  /**
    * Linearly interpolates between x and y. Where a <= 0, x is returned, and
    * where a >= 1, y is returned. No extrapolation will occur.
    */
   __device__ __inline__ float clampedLerp(float x, float y, float a) {
-    return lerp(x, y, clamp(a));
+    return lerp(x, y, clamp(a, 0.0f, 1.0f));
   }
 
   __device__ __inline__ float3 at(const optix::Ray& r, float t) {
@@ -158,6 +138,10 @@ namespace math {
     return min + (max - min) * curand_uniform(rngState);
   }
 
+  __device__ __inline__ float2 nextFloat2(curandState* rngState, float min, float max) {
+    return make_float2(nextFloat(rngState, min, max), nextFloat(rngState, min, max));
+  }
+
   /**
    * Samples a unit disk, ensuring that the samples are uniformally distributed
    * throughout the area of the disk.
@@ -169,46 +153,9 @@ namespace math {
    * @param dy [out] the y-coordinate of the sample
    */
   __device__ __inline__ void areaSampleDisk(curandState* rngState, float* dx, float* dy) {
-    float sx = nextFloat(rngState, -1.0f, 1.0f);
-    float sy = nextFloat(rngState, -1.0f, 1.0f);
-
-    // Handle degeneracy at the origin.
-    if (sx == 0.0f && sy == 0.0f) {
-      *dx = 0.0f;
-      *dy = 0.0f;
-      return;
-    }
-
-    float r;
-    float theta;
-    if (sx >= -sy) {
-      if (sx > sy) {
-        // Region 1.
-        r = sx;
-        if (sy > 0.0f) {
-          theta = sy / r;
-        } else {
-          theta = 8.0f + sy / r;
-        }
-      } else {
-        // Region 2.
-        r = sy;
-        theta = 2.0f - sx / r;
-      }
-    } else {
-      if (sx <= sy) {
-        // Region 3.
-        r = -sx;
-        theta = 4.0f - sy / r;
-      } else {
-        // Region 4.
-        r = -sy;
-        theta = 6.0f + sx / r;
-      }
-    }
-    theta *= XRAY_PI_4;
-    *dx = r * cosf(theta);
-    *dy = r * sinf(theta);
+    float2 sample = square_to_disk(nextFloat2(rngState, 0.0f, 1.0f));
+    *dx = sample.x;
+    *dy = sample.y;
   }
 
   /**
@@ -270,15 +217,17 @@ namespace math {
 
     x = fabsf(2.0f * x); // Convert to the range [0, 2].
 
-    if (x > 1.0f) {
+    if (x > 1.0f && x < 2.0f) {
       return ((-B - 6.0f * C) * (x * x * x)
         + (6.0f * B + 30.0f * C) * (x * x)
         + (-12.0f * B - 48.0f * C) * x
         + (8.0f * B + 24.0f * C)) * (1.0f / 6.0f);
-    } else {
+    } else if (x < 1.0f) {
       return ((12.0f - 9.0f * B - 6.0f * C) * (x * x * x)
         + (-18.0f + 12.0f * B + 6.0f * C) * (x * x)
         + (6.0f - 2.0f * B)) * (1.0f / 6.0f);
+    } else {
+      return 0.0f;
     }
   }
 
@@ -296,12 +245,12 @@ namespace math {
     return mitchellFilter(x / width) * mitchellFilter(y / width);
   }
 
-  __device__ __inline__ float squaredNorm(const float3& v) {
-    return v.x * v.x + v.y * v.y + v.z * v.z;
+  __device__ __inline__ bool isNaN(float x) {
+    return x != x;
   }
 
   __device__ __inline__ bool isNaN(const float3& v) {
-    return (v.x != v.x) | (v.y != v.y) | (v.z != v.z);
+    return isNaN(v.x) | isNaN(v.y) | isNaN(v.z);
   }
 
 }

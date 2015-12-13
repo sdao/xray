@@ -51,20 +51,21 @@ rtDeclareVariable(uint2, launchDim, rtLaunchDim, );
   */
 #define BIASED_RADIANCE_CLAMPING 50.0
 
+/** Filter radius. */
 #define FILTER_WIDTH 2.0f
 
 RT_PROGRAM void camera() {
   curandState rngState;
   curand_init((frameNumber * launchDim.x * launchDim.y) + (launchIndex.x * launchDim.y) + launchIndex.y, 0, 0, &rngState);
   
-  float offsetY = math::nextFloat(&rngState, -FILTER_WIDTH, FILTER_WIDTH);
   float offsetX = math::nextFloat(&rngState, -FILTER_WIDTH, FILTER_WIDTH);
+  float offsetY = math::nextFloat(&rngState, -FILTER_WIDTH, FILTER_WIDTH);
 
   float posX = float(launchIndex.x) + offsetX;
   float posY = float(launchIndex.y) + offsetY;
 
-  float fracX = float(launchIndex.x) / float(launchDim.x - 1);
-  float fracY = float(launchIndex.y) / float(launchDim.y - 1);
+  float fracX = posX / float(launchDim.x - 1);
+  float fracY = posY / float(launchDim.y - 1);
 
   float3 offset = make_float3(focalPlaneRight * fracX, focalPlaneUp * fracY, 0);
   float3 lookAt = focalPlaneOrigin + offset;
@@ -125,10 +126,10 @@ RT_PROGRAM void commit() {
   float posX = launchIndex.x;
   float posY = launchIndex.y;
 
-  int minX = math::clampAny(int(floorf(posX - FILTER_WIDTH)), 0, int(launchDim.x - 1));
-  int maxX = math::clampAny(int(ceilf(posX + FILTER_WIDTH)), 0, int(launchDim.x - 1));
-  int minY = math::clampAny(int(floorf(posY - FILTER_WIDTH)), 0, int(launchDim.y - 1));
-  int maxY = math::clampAny(int(ceilf(posY + FILTER_WIDTH)), 0, int(launchDim.y - 1));
+  int minX = clamp(int(ceilf(posX - FILTER_WIDTH - XRAY_EXTREMELY_SMALL)), 0, int(launchDim.x - 1));
+  int maxX = clamp(int(floorf(posX + FILTER_WIDTH + XRAY_EXTREMELY_SMALL)), 0, int(launchDim.x - 1));
+  int minY = clamp(int(ceilf(posY - FILTER_WIDTH - XRAY_EXTREMELY_SMALL)), 0, int(launchDim.y - 1));
+  int maxY = clamp(int(floorf(posY + FILTER_WIDTH + XRAY_EXTREMELY_SMALL)), 0, int(launchDim.y - 1));
   
   float4 currentAccum = accumBuffer[launchIndex];
 
@@ -137,24 +138,22 @@ RT_PROGRAM void commit() {
       float3 newRadiance = rawBuffer[make_uint3(SAMPLE_RADIANCE, xx, yy)];
       float3 newPosition = rawBuffer[make_uint3(SAMPLE_POSITION, xx, yy)];
 
-      if (fabsf(posX - newPosition.x) <= FILTER_WIDTH && fabsf(posY - newPosition.y) <= FILTER_WIDTH) {
-        float weight = math::mitchellFilter(
-          posX - newPosition.x,
-          posY - newPosition.y,
-          FILTER_WIDTH
-        );
+      float weight = math::mitchellFilter(
+        posX - newPosition.x,
+        posY - newPosition.y,
+        FILTER_WIDTH
+      );
 
-        currentAccum.x += newRadiance.x * weight;
-        currentAccum.y += newRadiance.y * weight;
-        currentAccum.z += newRadiance.z * weight;
-        currentAccum.w += weight;
-      }
+      currentAccum.x += newRadiance.x * weight;
+      currentAccum.y += newRadiance.y * weight;
+      currentAccum.z += newRadiance.z * weight;
+      currentAccum.w += weight;
     }
   }
 
   accumBuffer[launchIndex] = currentAccum;
-  float3 color = make_float3(currentAccum.x, currentAccum.y, currentAccum.z) / currentAccum.w;
 
+  float3 color = make_float3(currentAccum.x, currentAccum.y, currentAccum.z) / currentAccum.w;
   imageBuffer[launchIndex] = math::colorToBgra(color);
 }
 
@@ -163,15 +162,6 @@ RT_PROGRAM void init() {
 }
 
 RT_PROGRAM void miss() {
-  /*
-  if (math::isNaN(normalRayData.radiance)) {
-    normalRayData.radiance = make_float3(1000000, 0, 1000000);
-  }
-  */
-
   normalRayData.radiance += backgroundColor * normalRayData.beta;
-
-  
-
   normalRayData.beta = make_float3(0);
 }
