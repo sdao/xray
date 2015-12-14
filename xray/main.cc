@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SDL.h>
 #include <boost/program_options.hpp>
+#include <chrono>
 #include "scene.h"
 #include "camera.h"
 
@@ -51,7 +52,8 @@ int main(int argc, char* argv[]) {
       SDL_WINDOW_SHOWN
     );
     SDL_Surface* windowSurface = SDL_GetWindowSurface(window);
-
+    
+    std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
     while (true) {
       SDL_Event event;
       while (SDL_PollEvent(&event)) {}
@@ -73,7 +75,12 @@ int main(int argc, char* argv[]) {
       std::cout << ".";
       int frameNumber = scene.defaultCamera()->frameNumber();
       if (frameNumber % 50 == 0) {
-        std::cout << " " << frameNumber << std::endl;
+        std::chrono::steady_clock::time_point endTime = std::chrono::steady_clock::now();
+        std::chrono::duration<float> runTime =
+          std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime);
+        float secsPerFrame = runTime.count() / 50;
+        std::cout << " " << frameNumber << " (" << secsPerFrame << " s/frame)" << std::endl;
+        startTime = endTime;
       }
     }
   } catch (std::exception& e) {

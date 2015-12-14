@@ -30,7 +30,7 @@ __device__ void sampleWorld(
 ) {
   float3 tangent;
   float3 binormal;
-  math::coordSystem(isectNormalObj, &tangent, &binormal);
+  shared::coordSystem(isectNormalObj, &tangent, &binormal);
 
   // BSDF computation expects incoming ray to be in local-space.
   float3 incomingLocal = math::worldToLocal(

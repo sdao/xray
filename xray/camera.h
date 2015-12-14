@@ -21,6 +21,7 @@ class Camera {
   optix::Program _miss;
   optix::Program _commit;
   optix::Program _init;
+  optix::Buffer _lights;
   optix::Buffer _raw;
   optix::Buffer _accum;
   optix::Buffer _image;

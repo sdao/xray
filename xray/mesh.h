@@ -9,6 +9,7 @@ class Mesh : public Geom {
   optix::Buffer _normals;
   optix::Buffer _faces;
   optix::float3 _origin;
+  optix::Aabb _bounds;
   int _numFaces;
   
   void readPolyModel(std::string name);
@@ -22,5 +23,6 @@ protected:
 public:
   Mesh(Xray xray, optix::float3 origin, std::string name);
   static Mesh* make(Xray xray, const Node& n);
+  virtual optix::Aabb getBoundingBox() const override;
 };
 

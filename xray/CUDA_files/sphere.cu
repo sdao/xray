@@ -59,8 +59,6 @@ RT_PROGRAM void sphereIntersect(int) {
 }
 
 RT_PROGRAM void sphereBounds(int, float result[6]) {
-  bool inverted = invertMode != 0;
-
   float3 boundsDiag = make_float3(radius);
 	Aabb* aabb = (Aabb*) result;
   aabb->set(origin - boundsDiag, origin + boundsDiag);

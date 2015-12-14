@@ -21,5 +21,7 @@ protected:
 public:
   Geom(optix::Context ctx);
   virtual ~Geom();
+  virtual optix::Aabb getBoundingBox() const = 0;
+  virtual void getBoundingSphere(optix::float3* origin, float* radius) const;
   optix::Geometry getGeometry() const;
 };

@@ -76,12 +76,14 @@ void Mesh::readPolyModel(std::string name) {
     _normals = _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, mesh->mNumVertices);
     optix::float3* vertexMap = static_cast<optix::float3*>(_vertices->map());
     optix::float3* normalMap = static_cast<optix::float3*>(_normals->map());
+    optix::Aabb b;
     for (size_t i = 0; i < mesh->mNumVertices; ++i) {
       aiVector3D thisPos = mesh->mVertices[i];
       aiVector3D thisNorm = mesh->mNormals[i];
 
       vertexMap[i] = optix::make_float3(thisPos.x, thisPos.y, thisPos.z) + _origin;
       normalMap[i] = optix::normalize(optix::make_float3(thisNorm.x, thisNorm.y, thisNorm.z));
+      b.include(vertexMap[i]);
     }
 
     // Add faces.
@@ -103,4 +105,8 @@ void Mesh::readPolyModel(std::string name) {
     _normals->unmap();
     _faces->unmap();
   }
+}
+
+optix::Aabb Mesh::getBoundingBox() const {
+  return _bounds;
 }

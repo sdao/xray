@@ -8,12 +8,12 @@
 #include "xray.h"
 
 class Instance {
-  static Light _nullLight;
-  
   optix::GeometryInstance _instance;
+  const Light* _light;
 
 public:
   Instance(Xray xray, const Geom* g, const Material* m, const AreaLight* l);
   ~Instance();
   optix::GeometryInstance getGeometryInstance() const;
+  bool getLight(const Light** light) const;
 };

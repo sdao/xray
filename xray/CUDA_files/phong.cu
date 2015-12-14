@@ -49,7 +49,7 @@ __device__ void sampleLocal(
   float3 reflectTangent;
   float3 reflectBinormal;
 
-  math::coordSystem(perfectReflect, &reflectTangent, &reflectBinormal);
+  shared::coordSystem(perfectReflect, &reflectTangent, &reflectBinormal);
 
   /* The below procedure should produce unit vectors.
    *

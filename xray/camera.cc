@@ -1,5 +1,6 @@
 #include "camera.h"
 #include "math.h"
+#include "light.h"
 
 Camera::Camera(
   Xray xray,
@@ -98,11 +99,24 @@ void Camera::prepare() {
   _ctx->setMissProgram(0, _miss);
 
   // Set up acceleration structures.
+  std::vector<const Light*> lightPtrs;
   optix::GeometryGroup group = _ctx->createGeometryGroup();
   group->setChildCount(_objs.size());
   for (int i = 0; i < _objs.size(); ++i) {
-    group->setChild(i, _objs[i]->getGeometryInstance());
+    const Instance* inst = _objs[i];
+    group->setChild(i, inst->getGeometryInstance());
+    const Light* l;
+    if (inst->getLight(&l)) {
+      lightPtrs.push_back(l);
+    }
   }
+
+  _lights = _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_USER, lightPtrs.size());
+  _lights->setElementSize(AreaLight::sizeofDeviceLight());
+  Light* lightsMapped = static_cast<Light*>(_lights->map());
+  std::memcpy(lightsMapped, lightPtrs.data(), AreaLight::sizeofDeviceLight() * lightPtrs.size());
+  _lights->unmap();
+  _ctx["lightsBuffer"]->setBuffer(_lights);
 
   optix::Acceleration accel = _ctx->createAcceleration("Trbvh", "Bvh");
   group->setAcceleration(accel);

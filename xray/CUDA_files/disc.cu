@@ -45,7 +45,7 @@ RT_PROGRAM void discIntersect(int) {
 RT_PROGRAM void discBounds(int, float result[6]) {
   float3 tangent;
   float3 binormal;
-  math::coordSystem(normal, &tangent, &binormal);
+  shared::coordSystem(normal, &tangent, &binormal);
 
   float3 tr = tangent * radiusOuter;
   float3 br = binormal * radiusOuter;

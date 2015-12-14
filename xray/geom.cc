@@ -15,6 +15,12 @@ void Geom::freeze() {
   _frozen = true;
 }
 
+void Geom::getBoundingSphere(optix::float3* origin, float* radius) const {
+  optix::Aabb b = getBoundingBox();
+  *origin = b.center();
+  *radius = length(b.extent()) * 0.5f;
+}
+
 optix::Geometry Geom::getGeometry() const {
   if (_frozen) {
     return _geom;

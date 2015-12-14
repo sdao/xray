@@ -5,18 +5,18 @@
 
 struct Light {
   optix::float3 color;
-  bool valid;
+  RTobject object;
 
-  __host__ __device__ static Light make(optix::float3 c) {
-    Light l;
-    l.color = c;
-    l.valid = true;
+  __host__ static Light* make(optix::float3 c, RTobject obj) {
+    Light* l = new Light();
+    l->color = c;
+    l->object = obj;
     return l;
   }
 
-  __host__ __device__ static Light make() {
-    Light l;
-    l.valid = false;
+  __host__ static Light* make() {
+    Light* l = new Light();
+    l->object = nullptr;
     return l;
   }
 

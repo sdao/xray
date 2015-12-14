@@ -6,13 +6,13 @@
 
 class AreaLight {
   optix::float3 _color;
-  Light _l;
 
 public:
   AreaLight(Xray xray, optix::float3 color);
   ~AreaLight();
   
   static AreaLight* make(Xray xray, const Node& n);
-  const Light* getLight() const;
+  static size_t sizeofDeviceLight();
+  const Light* getLight(RTobject object) const;
 };
 

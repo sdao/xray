@@ -25,7 +25,7 @@ RT_PROGRAM void radiance() {
   float3 isectNormalObj = rtTransformNormal(RT_OBJECT_TO_WORLD, isectNormal); 
   float3 isectPos = normalRayData.origin + normalRayData.direction * isectDist;
 
-  if (light.valid) {
+  if (light.object != nullptr) {
     normalRayData.radiance += normalRayData.beta * light.emit(normalRayData.direction, isectNormalObj);
   }
   
