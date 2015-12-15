@@ -116,7 +116,9 @@ void Camera::prepare() {
   _lights = _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_USER, lightPtrs.size());
   _lights->setElementSize(sizeof(Light));
   Light* lightsMapped = static_cast<Light*>(_lights->map());
-  std::memcpy(lightsMapped, lightPtrs.data(), sizeof(Light) * lightPtrs.size());
+  for (int i = 0; i < lightPtrs.size(); ++i) {
+    lightsMapped[i] = *lightPtrs[i];
+  }
   _lights->unmap();
   _ctx["lightsBuffer"]->setBuffer(_lights);
   _ctx["numLights"]->setInt(lightPtrs.size());

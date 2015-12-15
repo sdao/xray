@@ -1,6 +1,6 @@
 #include "xray.h"
 
-Xray::Xray() {
+Xray::Xray() : _nextID(0) {
   _ctx = optix::Context::create();
   _ctx->setRayTypeCount(2);
   _ctx->setEntryPointCount(3);

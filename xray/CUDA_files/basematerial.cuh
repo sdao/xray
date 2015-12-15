@@ -17,8 +17,88 @@ rtDeclareVariable(int, isectHitId, attribute isectHitId, );
 rtDeclareVariable(int, numLights, , ); 
 rtBuffer<Light, 1> lightsBuffer;
 
+__device__ float3 evalBSDFLocal(const float3& incoming, const float3& outgoing);
+__device__ float evalPDFLocal(const float3& incoming, const float3& outgoing);
+__device__ void sampleLocal(
+  curandState* rng,
+  const float3& incoming,
+  float3* outgoingOut,
+  float3* bsdfOut,
+  float* pdfOut
+);
+
 __device__ void scatter(NormalRayData& rayData, float3 normal, float3 pos);
-__device__ bool shouldDirectIlluminate() { return false; }
+__device__ __inline__ bool shouldDirectIlluminate();
+
+__device__ void sampleWorld(
+  curandState* rng,
+  const float3& isectNormalObj,
+  const float3& incoming,
+  float3* outgoingOut,
+  float3* bsdfOut,
+  float* pdfOut
+) {
+  float3 tangent;
+  float3 binormal;
+  shared::coordSystem(isectNormalObj, &tangent, &binormal);
+
+  // BSDF computation expects incoming ray to be in local-space.
+  float3 incomingLocal = math::worldToLocal(
+    incoming,
+    tangent,
+    binormal,
+    isectNormalObj
+  );
+
+  // Sample BSDF for direction, color, and probability.
+  float3 outgoingLocal;
+  float3 tempBsdf;
+  float tempPdf;
+  sampleLocal(rng, incomingLocal, &outgoingLocal, &tempBsdf, &tempPdf);
+
+  // Rendering expects outgoing ray to be in world-space.
+  float3 outgoingWorld = math::localToWorld(
+    outgoingLocal,
+    tangent,
+    binormal,
+    isectNormalObj
+  );
+
+  *outgoingOut = outgoingWorld;
+  *bsdfOut = tempBsdf;
+  *pdfOut = tempPdf;
+}
+
+__device__ void evalWorld(
+  const optix::float3& isectNormalObj,
+  const optix::float3& incomingWorld,
+  const optix::float3& outgoingWorld,
+  optix::float3* bsdfOut,
+  float* pdfOut
+) {
+  float3 tangent;
+  float3 binormal;
+  shared::coordSystem(isectNormalObj, &tangent, &binormal);
+
+  // BSDF and PDF computation expects rays to be in local-space.
+  float3 incomingLocal = math::worldToLocal(
+    incomingWorld,
+    tangent,
+    binormal,
+    isectNormalObj
+  );
+
+  float3 outgoingLocal = math::worldToLocal(
+    outgoingWorld,
+    tangent,
+    binormal,
+    isectNormalObj
+  );
+
+  
+  *bsdfOut = evalBSDFLocal(incomingLocal, outgoingLocal);
+  *pdfOut = evalPDFLocal(incomingLocal, outgoingLocal);
+}
 
 __device__ optix::float3 uniformSampleOneLight(
   const NormalRayData& data,

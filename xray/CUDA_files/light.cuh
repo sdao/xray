@@ -12,22 +12,21 @@
 rtDeclareVariable(rtObject, sceneRoot, , );
 
 __device__ void evalWorld(
-  const NormalRayData& data,
   const optix::float3& isectNormalObj,
   const optix::float3& incomingWorld,
   const optix::float3& outgoingWorld,
   optix::float3* bsdfOut,
   float* bsdfPdfOut
-) {}
+);
 
 __device__ void sampleWorld(
-  const NormalRayData& data,
-  const optix::float3& isectNormalObj,
-  const optix::float3& incomingWorld,
-  const optix::float3* outgoingWorld,
-  optix::float3* bsdfOut,
-  float* bsdfPdfOut
-) {}
+  curandState* rng,
+  const float3& isectNormalObj,
+  const float3& incoming,
+  float3* outgoingOut,
+  float3* bsdfOut,
+  float* pdfOut
+);
 #endif
 
 struct Light {
@@ -87,7 +86,6 @@ struct Light {
       optix::float3 bsdf;
       float bsdfPdf;
       evalWorld(
-        data,
         isectNormalObj,
         -data.direction,
         outgoingWorld,
@@ -116,7 +114,7 @@ struct Light {
     optix::float3 bsdf;
     float bsdfPdf;
     sampleWorld(
-      data,
+      data.rng,
       isectNormalObj,
       -data.direction,
       &outgoingWorld,

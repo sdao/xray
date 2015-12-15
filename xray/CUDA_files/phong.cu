@@ -36,6 +36,15 @@ __device__ float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) 
   return evalBSDFInternal(perfectReflect, outgoing);
 }
 
+__device__ float evalPDFLocal(const float3& incoming, const float3& outgoing) {
+  if (!math::localSameHemisphere(incoming, outgoing)) {
+    return 0.0f;
+  }
+
+  float3 perfectReflect = make_float3(-incoming.x, -incoming.y, incoming.z);
+  return evalPDFInternal(perfectReflect, outgoing);
+}
+
 __device__ void sampleLocal(
   curandState* rng,
   const float3& incoming,
@@ -84,4 +93,8 @@ __device__ void sampleLocal(
   );
   *bsdfOut = evalBSDFInternal(perfectReflect, *outgoingOut);
   *pdfOut = evalPDFInternal(perfectReflect, *outgoingOut);
+}
+
+__device__ __inline__ bool shouldDirectIlluminate() {
+  return true;
 }
