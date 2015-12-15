@@ -1,10 +1,10 @@
 #include "normaltest.h"
 
-NormalTest::NormalTest(Xray xray) : Material(xray.getContext()) {
+NormalTest::NormalTest(Xray* xray) : Material(xray->getContext()) {
   freeze();
 }
 
-NormalTest* NormalTest::make(Xray xray, const Node& n) {
+NormalTest* NormalTest::make(Xray* xray, const Node& n) {
   return new NormalTest(xray);
 }
 

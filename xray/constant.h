@@ -9,7 +9,7 @@ protected:
   virtual std::string getClosestHitProgram() const override;
 
 public:
-  Constant(Xray xray, optix::float3 color);
-  static Constant* make(Xray xray, const Node& n);
+  Constant(Xray* xray, optix::float3 color);
+  static Constant* make(Xray* xray, const Node& n);
 };
 

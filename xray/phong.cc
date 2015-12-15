@@ -1,8 +1,8 @@
 #include "phong.h"
 #include "CUDA_files/shared.cuh"
 
-Phong::Phong(Xray xray, float e, optix::float3 c)
-  : Material(xray.getContext()), _exp(e), _color(c) {
+Phong::Phong(Xray* xray, float e, optix::float3 c)
+  : Material(xray->getContext()), _exp(e), _color(c) {
   _material["scaleBRDF"]->setFloat(c * (e + 2.0f) / XRAY_TWO_PI);
   _material["scaleProb"]->setFloat((e + 1.0f) / XRAY_TWO_PI);
   _material["exponent"]->setFloat(e);
@@ -11,7 +11,7 @@ Phong::Phong(Xray xray, float e, optix::float3 c)
   freeze();
 }
 
-Phong* Phong::make(Xray xray, const Node& n) {
+Phong* Phong::make(Xray* xray, const Node& n) {
   return new Phong(xray, n.getFloat("exponent"), n.getFloat3("color"));
 }
 

@@ -4,6 +4,7 @@
 #include <optix_world.h>
 
 class Xray {
+  int _nextID;
   optix::Context _ctx;
 
 public:
@@ -11,4 +12,5 @@ public:
   ~Xray();
 
   optix::Context getContext() const;
+  int getNextID();
 };

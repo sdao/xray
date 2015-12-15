@@ -1,11 +1,11 @@
 #include "constant.h"
 
-Constant::Constant(Xray xray, optix::float3 color) : Material(xray.getContext()) {
+Constant::Constant(Xray* xray, optix::float3 color) : Material(xray->getContext()) {
   _material["color"]->set3fv(&color.x);
   freeze();
 }
 
-Constant* Constant::make(Xray xray, const Node& n) {
+Constant* Constant::make(Xray* xray, const Node& n) {
   return new Constant(xray, n.getFloat3("color"));
 }
 

@@ -46,7 +46,7 @@ class Scene {
   void readMultiple(
     const boost::property_tree::ptree& root,
     const std::string& prefix,
-    const std::function<T(Xray xray, const Node&, std::string type)> lookup,
+    const std::function<T(Xray* xray, const Node&, std::string type)> lookup,
     std::map<std::string, T>& storage
   );
   /** Reads all of the lights in the given property tree. */

@@ -1,8 +1,8 @@
 #include "disc.h"
 #include "CUDA_files/shared.cuh"
 
-Disc::Disc(Xray xray, optix::float3 origin, optix::float3 normal, float radiusOuter, float radiusInner)
-  : Geom(xray.getContext()), _origin(origin), _normal(normal), _radiusOuter(radiusOuter), _radiusInner(radiusInner) {
+Disc::Disc(Xray* xray, optix::float3 origin, optix::float3 normal, float radiusOuter, float radiusInner)
+  : Geom(xray->getContext()), _origin(origin), _normal(normal), _radiusOuter(radiusOuter), _radiusInner(radiusInner) {
   _geom["origin"]->set3fv(&_origin.x);
   _geom["normal"]->set3fv(&_normal.x);
   _geom["radiusOuter"]->setFloat(_radiusOuter);
@@ -11,7 +11,7 @@ Disc::Disc(Xray xray, optix::float3 origin, optix::float3 normal, float radiusOu
   freeze();
 }
 
-Disc* Disc::make(Xray xray, const Node& n) {
+Disc* Disc::make(Xray* xray, const Node& n) {
   return new Disc(
     xray,
     n.getFloat3("origin"),

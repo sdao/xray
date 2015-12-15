@@ -1,7 +1,7 @@
 #include "sphere.h"
 
-Sphere::Sphere(Xray xray, optix::float3 origin, float radius, bool inverted)
-  : Geom(xray.getContext()), _origin(origin), _radius(radius), _inverted(inverted) {
+Sphere::Sphere(Xray* xray, optix::float3 origin, float radius, bool inverted)
+  : Geom(xray->getContext()), _origin(origin), _radius(radius), _inverted(inverted) {
   _geom["origin"]->set3fv(&_origin.x);
   _geom["radius"]->setFloat(_radius);
   _geom["invertMode"]->setInt(_inverted ? 1 : 0);
@@ -9,7 +9,7 @@ Sphere::Sphere(Xray xray, optix::float3 origin, float radius, bool inverted)
   freeze();
 }
 
-Sphere* Sphere::make(Xray xray, const Node& n) {
+Sphere* Sphere::make(Xray* xray, const Node& n) {
   return new Sphere(
     xray,
     n.getFloat3("origin"),

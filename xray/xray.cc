@@ -11,3 +11,7 @@ Xray::~Xray() {}
 optix::Context Xray::getContext() const {
   return _ctx;
 }
+
+int Xray::getNextID() {
+  return _nextID++;
+}

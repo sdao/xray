@@ -11,9 +11,11 @@ using namespace optix;
 rtDeclareVariable(float3, origin, , );
 rtDeclareVariable(float, radius, , );
 rtDeclareVariable(int, invertMode, , );
+rtDeclareVariable(int, id, , );
 
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
 rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
+rtDeclareVariable(int, isectHitId, attribute isectHitId, );
 
 RT_PROGRAM void sphereIntersect(int) {
   bool inverted = invertMode != 0;
@@ -42,6 +44,7 @@ RT_PROGRAM void sphereIntersect(int) {
         float3 normal = normalize(inverted ? origin - pt : pt - origin);
 
         isectNormal = normal;
+        isectHitId = id;
         rtReportIntersection(0);
       }
     } else if (math::isPositive(resPos)) {
@@ -50,6 +53,7 @@ RT_PROGRAM void sphereIntersect(int) {
         float3 normal = normalize(inverted ? origin - pt : pt - origin);
       
         isectNormal = normal;
+        isectHitId = id;
         rtReportIntersection(0);
       }
     }

@@ -56,7 +56,7 @@ template<typename T>
 void Scene::readMultiple(
   const boost::property_tree::ptree& root,
   const std::string& prefix,
-  const std::function<T(Xray xray, const Node&, std::string type)> lookup,
+  const std::function<T(Xray* xray, const Node&, std::string type)> lookup,
   std::map<std::string, T>& storage
 ) {
   const auto& children = root.get_child(prefix);
@@ -75,7 +75,7 @@ void Scene::readMultiple(
         throw std::runtime_error("Name was reused");
       }
 
-      storage[name] = lookup(_xray, node, type);
+      storage[name] = lookup(&_xray, node, type);
     } catch (std::runtime_error err) {
       throw std::runtime_error(
         str(format("Error parsing node (%1%.[%2%]%3%):\n%4%") % prefix % count % name % err.what())
@@ -87,7 +87,7 @@ void Scene::readMultiple(
 }
 
 void Scene::readLights(const ptree& root) {
-  static auto lookup = [](Xray xray, const Node& n, std::string type) -> const AreaLight* {
+  static auto lookup = [](Xray* xray, const Node& n, std::string type) -> const AreaLight* {
     if (type == "area") {
       return AreaLight::make(xray, n);
     } else {
@@ -99,7 +99,7 @@ void Scene::readLights(const ptree& root) {
 }
 
 void Scene::readMats(const ptree& root) {
-  static auto lookup = [](Xray xray, const Node& n, std::string type) -> const Material* {
+  static auto lookup = [](Xray* xray, const Node& n, std::string type) -> const Material* {
     if (type == "dielectric") {
       return Dielectric::make(xray, n);
     } else if (type == "lambert") {
@@ -115,7 +115,7 @@ void Scene::readMats(const ptree& root) {
 }
 
 void Scene::readGeomInstances(const ptree& root) {
-  static auto lookup = [](Xray xray, const Node& n, std::string type) -> const Instance* {
+  static auto lookup = [](Xray* xray, const Node& n, std::string type) -> const Instance* {
     const Geom* g;
     if (type == "disc") {
       g = Disc::make(xray, n);
@@ -126,7 +126,7 @@ void Scene::readGeomInstances(const ptree& root) {
     } else {
       throw std::runtime_error(type + " is not a recognized type");
     }
-    const Instance* instance = new Instance(xray, g, n.getMaterial("mat"), n.getLight("light"));
+    const Instance* instance = Instance::make(xray, g, n.getMaterial("mat"), n.getLight("light"));
     delete g;
     return instance;
   };
@@ -135,7 +135,7 @@ void Scene::readGeomInstances(const ptree& root) {
 }
 
 void Scene::readCameras(const ptree& root) {
-  static auto lookup = [](Xray xray, const Node& n, std::string type) -> Camera* {
+  static auto lookup = [](Xray* xray, const Node& n, std::string type) -> Camera* {
     if (type == "persp") {
       return Camera::make(xray, n);
     } else {

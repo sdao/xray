@@ -6,6 +6,7 @@
 
 using namespace optix;
 
+rtDeclareVariable(int, id, , );
 rtBuffer<float3> vertexBuffer;     
 rtBuffer<float3> normalBuffer;
 rtBuffer<int3> faceIndices; // Index into vertex/normalBuffer for each face.
@@ -13,6 +14,7 @@ rtBuffer<int3> faceIndices; // Index into vertex/normalBuffer for each face.
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
 
 rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
+rtDeclareVariable(int, isectHitId, attribute isectHitId, );
 
 RT_PROGRAM void meshIntersect(int primIdx)
 {
@@ -35,6 +37,7 @@ RT_PROGRAM void meshIntersect(int primIdx)
       float3 n2 = normalBuffer[face.z];
       
       isectNormal = normalize(n1 * beta + n2 * gamma + n0 * (1.0f - beta - gamma));
+      isectHitId = id;
       rtReportIntersection(0);
     }
   }

@@ -78,8 +78,8 @@ int main(int argc, char* argv[]) {
         std::chrono::steady_clock::time_point endTime = std::chrono::steady_clock::now();
         std::chrono::duration<float> runTime =
           std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime);
-        float secsPerFrame = runTime.count() / 50;
-        std::cout << " " << frameNumber << " (" << secsPerFrame << " s/frame)" << std::endl;
+        float fps = 50.0f / runTime.count();
+        std::cout << " " << frameNumber << " (" << fps << " fps)" << std::endl;
         startTime = endTime;
       }
     }

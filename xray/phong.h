@@ -14,7 +14,7 @@ protected:
   virtual std::string getClosestHitProgram() const override;
 
 public:
-  Phong(Xray xray, float e, optix::float3 c);
-  static Phong* make(Xray xray, const Node& n);
+  Phong(Xray* xray, float e, optix::float3 c);
+  static Phong* make(Xray* xray, const Node& n);
 };
 

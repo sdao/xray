@@ -13,7 +13,7 @@ protected:
   virtual std::string getClosestHitProgram() const override;
 
 public:
-  Lambert(Xray xray, optix::float3 albedo);
-  static Lambert* make(Xray xray, const Node& n);
+  Lambert(Xray* xray, optix::float3 albedo);
+  static Lambert* make(Xray* xray, const Node& n);
 };
 

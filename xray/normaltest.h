@@ -9,7 +9,7 @@ protected:
   virtual std::string getClosestHitProgram() const override;
 
 public:
-  NormalTest(Xray xray);
-  static NormalTest* make(Xray xray, const Node& n);
+  NormalTest(Xray* xray);
+  static NormalTest* make(Xray* xray, const Node& n);
 };
 

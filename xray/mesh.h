@@ -21,8 +21,8 @@ protected:
   virtual std::string getBoundsProgram() const override;
 
 public:
-  Mesh(Xray xray, optix::float3 origin, std::string name);
-  static Mesh* make(Xray xray, const Node& n);
+  Mesh(Xray* xray, optix::float3 origin, std::string name);
+  static Mesh* make(Xray* xray, const Node& n);
   virtual optix::Aabb getBoundingBox() const override;
 };
 

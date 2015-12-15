@@ -3,7 +3,7 @@
 #include "light.h"
 
 Camera::Camera(
-  Xray xray,
+  Xray* xray,
   optix::Matrix4x4 xform,
   const std::vector<const Instance*>& objs,
   int ww,
@@ -11,7 +11,7 @@ Camera::Camera(
   float fov,
   float len,
   float fStop
-) : _ctx(xray.getContext()),
+) : _ctx(xray->getContext()),
     _focalLength(len),
     _lensRadius((len / fStop) * 0.5f), // Diameter = focalLength / fStop.
     _camToWorldXform(xform),
@@ -60,7 +60,7 @@ Camera::~Camera() {
   _ctx->destroy();
 }
 
-Camera* Camera::make(Xray xray, const Node& n) {
+Camera* Camera::make(Xray* xray, const Node& n) {
   return new Camera(
     xray,
     shared::rotationThenTranslation(n.getFloat("rotateAngle"), n.getFloat3("rotateAxis"), n.getFloat3("translate")),
@@ -99,24 +99,27 @@ void Camera::prepare() {
   _ctx->setMissProgram(0, _miss);
 
   // Set up acceleration structures.
-  std::vector<const Light*> lightPtrs;
+  std::vector<Light*> lightPtrs;
   optix::GeometryGroup group = _ctx->createGeometryGroup();
   group->setChildCount(_objs.size());
   for (int i = 0; i < _objs.size(); ++i) {
     const Instance* inst = _objs[i];
+    optix::GeometryInstance g = inst->getGeometryInstance();
+    Light* l = inst->getLightInstance();
+
     group->setChild(i, inst->getGeometryInstance());
-    const Light* l;
-    if (inst->getLight(&l)) {
+    if (l->id != -1) {
       lightPtrs.push_back(l);
     }
   }
 
   _lights = _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_USER, lightPtrs.size());
-  _lights->setElementSize(AreaLight::sizeofDeviceLight());
+  _lights->setElementSize(sizeof(Light));
   Light* lightsMapped = static_cast<Light*>(_lights->map());
-  std::memcpy(lightsMapped, lightPtrs.data(), AreaLight::sizeofDeviceLight() * lightPtrs.size());
+  std::memcpy(lightsMapped, lightPtrs.data(), sizeof(Light) * lightPtrs.size());
   _lights->unmap();
   _ctx["lightsBuffer"]->setBuffer(_lights);
+  _ctx["numLights"]->setInt(lightPtrs.size());
 
   optix::Acceleration accel = _ctx->createAcceleration("Trbvh", "Bvh");
   group->setAcceleration(accel);

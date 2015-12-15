@@ -12,9 +12,11 @@ rtDeclareVariable(float3, origin, , );
 rtDeclareVariable(float3, normal, , );
 rtDeclareVariable(float, radiusOuter, , );
 rtDeclareVariable(float, radiusInner, , );
+rtDeclareVariable(int, id, , );
 
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
 rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
+rtDeclareVariable(int, isectHitId, attribute isectHitId, );
 
 RT_PROGRAM void discIntersect(int) {
   // See Wikipedia:
@@ -33,6 +35,7 @@ RT_PROGRAM void discIntersect(int) {
         // In the disc.
         if (rtPotentialIntersection(d)) {
           isectNormal = normal;
+          isectHitId = id;
           rtReportIntersection(0);
         }
       }
@@ -50,7 +53,7 @@ RT_PROGRAM void discBounds(int, float result[6]) {
   float3 tr = tangent * radiusOuter;
   float3 br = binormal * radiusOuter;
 
-	Aabb* aabb = (Aabb*) result;
+  Aabb* aabb = (Aabb*) result;
   aabb->set(make_float3(0), make_float3(0));
   aabb->include(origin + tr + br);
   aabb->include(origin - tr - br);

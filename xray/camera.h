@@ -44,7 +44,7 @@ class Camera {
 
 public:
   Camera(
-    Xray xray,
+    Xray* xray,
     optix::Matrix4x4 xform,
     const std::vector<const Instance*>& objs,
     int ww,
@@ -55,7 +55,7 @@ public:
   );
   ~Camera();
 
-  static Camera* make(Xray xray, const Node& n);
+  static Camera* make(Xray* xray, const Node& n);
 
   optix::Buffer imageBuffer();
   int pixelWidth() const;

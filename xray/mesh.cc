@@ -3,7 +3,7 @@
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
 
-Mesh::Mesh(Xray xray, optix::float3 origin, std::string name) : Geom(xray.getContext()), _origin(origin) {
+Mesh::Mesh(Xray* xray, optix::float3 origin, std::string name) : Geom(xray->getContext()), _origin(origin) {
   readPolyModel(name);
 
   _geom["vertexBuffer"]->setBuffer(_vertices);
@@ -13,7 +13,7 @@ Mesh::Mesh(Xray xray, optix::float3 origin, std::string name) : Geom(xray.getCon
   freeze();
 }
 
-Mesh* Mesh::make(Xray xray, const Node& n) {
+Mesh* Mesh::make(Xray* xray, const Node& n) {
   return new Mesh(
     xray,
     n.getFloat3("origin"),

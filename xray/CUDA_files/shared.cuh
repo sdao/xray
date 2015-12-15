@@ -10,8 +10,12 @@
 #define XRAY_PI_4 0.7853981633974483f
 /** 1/Pi as a float. */
 #define XRAY_INV_PI 0.3183098861837907f
-/** 1/Pi as a float. */
+/** 2 * Pi as a single-precision float. */
 #define XRAY_TWO_PI 6.2831853071795865f
+/** 4 * Pi as a single-precision float. */
+#define XRAY_FOUR_PI 12.5663706143591730f
+/** The number of steradians in a sphere (4 * Pi). */
+#define XRAY_STERADIANS_PER_SPHERE XRAY_FOUR_PI
 
 enum RayTypes {
   RAY_TYPE_NORMAL = 0,

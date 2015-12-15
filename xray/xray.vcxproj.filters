@@ -10,9 +10,6 @@
     <CudaCompile Include="CUDA_files\camera.cu">
       <Filter>CUDA_files</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\anyhit.cu">
-      <Filter>CUDA_files</Filter>
-    </CudaCompile>
     <CudaCompile Include="CUDA_files\constant.cu">
       <Filter>CUDA_files\materials</Filter>
     </CudaCompile>
@@ -30,6 +27,9 @@
     </CudaCompile>
     <CudaCompile Include="CUDA_files\phong.cu">
       <Filter>CUDA_files\materials</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CUDA_files\anyhit.cu">
+      <Filter>CUDA_files</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>

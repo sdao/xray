@@ -27,6 +27,13 @@ namespace math {
   }
 
   /**
+   * Determines whether a vec's magnitude is exactly zero, with no epsilon check.
+   */
+  __device__ __inline__ bool isVectorExactlyZero(const float3& v) {
+    return v.x == 0.0f && v.y == 0.0f & v.z == 0.0f;
+  }
+
+  /**
    * Linearly interpolates between x and y. Where a <= 0, x is returned, and
    * where a >= 1, y is returned. No extrapolation will occur.
    */
@@ -119,6 +126,10 @@ namespace math {
 
   __device__ __inline__ float2 nextFloat2(curandState* rngState, float min, float max) {
     return make_float2(nextFloat(rngState, min, max), nextFloat(rngState, min, max));
+  }
+
+  __device__ __inline__ float nextGaussian(curandState* rngState) {
+    return curand_normal(rngState);
   }
 
   /**
@@ -230,6 +241,123 @@ namespace math {
 
   __device__ __inline__ bool isNaN(const float3& v) {
     return isNaN(v.x) | isNaN(v.y) | isNaN(v.z);
+  }
+
+  /**
+   * Calculates the power heuristic for multiple importance sampling of
+   * two separate functions.
+   *
+   * See Pharr & Humphreys p. 693 for more information.
+   *
+   * @param nf   number of samples taken with a Pf distribution
+   * @param fPdf probability according to the Pf distribution
+   * @param ng   number of samples taken with a Pg distribution
+   * @param gPdf probability according to the Pg distribution
+   * @returns    the weight according to the power heuristic
+   */
+  __device__ __inline__ float powerHeuristic(int nf, float fPdf, int ng, float gPdf) {
+    float f = nf * fPdf;
+    float g = ng * gPdf;
+
+    return (f * f) / (f * f + g * g);
+  }
+
+  __device__ __inline__ bool sphereContains(const float3& or, float r, const float3& v) {
+    return dot(v - or, v - or) <= (r * r);
+  }
+
+  /**
+   * Returns the probability that any solid angle was sampled uniformly
+   * from a unit sphere.
+   */
+  __device__ __inline__ float uniformSampleSpherePDF() {
+    return 1.0f / XRAY_STERADIANS_PER_SPHERE;
+  }
+
+  /**
+   * Uniformly samples from a unit sphere, with respect to the sphere's
+   * surface area.
+   *
+   * @param rng the per-thread RNG in use
+   * @returns   the uniformly-distributed random vector in the sphere
+   */
+  __device__ __inline__ float3 uniformSampleSphere(curandState* rng) {
+    // See MathWorld <http://mathworld.wolfram.com/SpherePointPicking.html>.
+    float x = nextGaussian(rng);
+    float y = nextGaussian(rng);
+    float z = nextGaussian(rng);
+    float a = 1.0f / sqrtf(x * x + y * y + z * z);
+
+    return make_float3(a * x, a * y, a * z);
+  }
+
+  /**
+   * Returns the probability that any solid angle already inside the given
+   * cone was sampled uniformly from the cone. The cone is defined by the
+   * half-angle of the subtended (apex) angle.
+   *
+   * @param halfAngle the half-angle of the cone
+   * @returns         the probability that the angle was sampled
+   */
+  __device__ __inline__ float uniformSampleConePDF(float halfAngle) {
+    const float solidAngle = XRAY_TWO_PI * (1.0f - cosf(halfAngle));
+    return 1.0f / solidAngle;
+  }
+
+  /**
+   * Returns the proabability that the given solid angle was sampled
+   * uniformly from the given cone. The cone is defined by the half-angle of
+   * the subtended (apex) angle. The probability is uniform if the direction
+   * is actually in the cone, and zero if it is outside the cone.
+   *
+   * @param halfAngle the half-angle of the cone
+   * @param direction the direction of the sampled vector
+   * @returns         the probability that the angle was sampled
+   */
+  __device__ __inline__ float uniformSampleConePDF(float halfAngle, const float3& direction) {
+    const float cosHalfAngle = cosf(halfAngle);
+    const float solidAngle = XRAY_TWO_PI * (1.0f - cosHalfAngle);
+    if (cosTheta(direction) > cosHalfAngle) {
+      // Within the sampling cone.
+      return 1.0f / solidAngle;
+    } else {
+      // Outside the sampling cone.
+      return 0.0f;
+    }
+  }
+
+  /**
+   * Generates a random ray in a cone around the positive z-axis, uniformly
+   * with respect to solid angle.
+   *
+   * Handy Mathematica code for checking that this works:
+   * \code
+   * R[a_] := (h = Cos[Pi/2];
+   *   z = RandomReal[{h, 1}];
+   *   t = RandomReal[{0, 2*Pi}];
+   *   r = Sqrt[1 - z^2];
+   *   x = r*Cos[t];
+   *   y = r*Sin[t];
+   *   {x, y, z})
+   *
+   * ListPointPlot3D[Map[R, Range[1000]], BoxRatios -> Automatic]
+   * \endcode
+   *
+   * @param rng       the per-thread RNG in use
+   * @param halfAngle the half-angle of the cone's opening; must be between 0
+   *                  and Pi/2 and in radians
+   * @returns         a uniformally-random vector within halfAngle radians of
+   *                  the positive z-axis
+   */
+  __device__ __inline__ float3 uniformSampleCone(curandState* rng, float halfAngle) {
+    float h = cosf(halfAngle);
+    float z = nextFloat(rng, h, 1.0f);
+    float t = nextFloat(rng, 0.0f, XRAY_TWO_PI);
+    float r = sqrtf(1.0f - (z * z));
+    float x = r * cosf(t);
+    float y = r * sinf(t);
+
+    return make_float3(x, y, z);
   }
 
 }
