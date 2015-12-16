@@ -141,7 +141,7 @@ RT_PROGRAM void radiance() {
   }
 
   if (math::isNaN(isectNormal)) {
-    normalRayData.beta = make_float3(0);
+    normalRayData.flags |= RAY_DEAD;
     return;
   }
 
@@ -149,9 +149,8 @@ RT_PROGRAM void radiance() {
   float3 isectPos = normalRayData.origin + normalRayData.direction * isectDist;
 
   // Regular illumination on light at current step.
-  if (light.id != -1 && !(normalRayData.flags & RAY_DID_DIRECT_ILLUMINATE)) {
-    normalRayData.radiance += normalRayData.beta * light.emit(normalRayData.direction, isectNormalObj);
-  }
+  int lume = !(normalRayData.flags & RAY_DID_DIRECT_ILLUMINATE) & (light.id != -1);
+  normalRayData.radiance += lume * normalRayData.beta * light.emit(normalRayData.direction, isectNormalObj);
   
   // Next event estimation with light at next step.
   if (materialFlags & MATERIAL_DIRECT_ILLUMINATE) {

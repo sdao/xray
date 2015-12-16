@@ -19,7 +19,7 @@ rtDeclareVariable(int, isectHitId, attribute isectHitId, );
 RT_PROGRAM void meshIntersect(int primIdx)
 {
   int3 face = faceIndices[primIdx];
-  if (face.x < 0 || face.y < 0 || face.z < 0) {
+  if (face.x < 0 | face.y < 0 | face.z < 0) {
     return;
   }
 
@@ -54,7 +54,7 @@ RT_PROGRAM void meshBounds(int primIdx, float result[6])
 
   optix::Aabb* aabb = (optix::Aabb*) result;
   
-  if (area > 0.0f && !isinf(area)) {
+  if (area > 0.0f & !isinf(area)) {
     aabb->m_min = fminf(fminf(v0, v1), v2);
     aabb->m_max = fmaxf(fmaxf(v0, v1), v2);
   } else {

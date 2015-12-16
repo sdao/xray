@@ -7,19 +7,13 @@
 rtDeclareVariable(float3, albedo, , );
 
 RT_CALLABLE_PROGRAM float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
-  if (!math::localSameHemisphere(incoming, outgoing)) {
-    return make_float3(0);
-  }
-
-  return albedo * XRAY_INV_PI;
+  int sameHemis = math::localSameHemisphere(incoming, outgoing);
+  return sameHemis * albedo * XRAY_INV_PI;
 }
 
 RT_CALLABLE_PROGRAM float evalPDFLocal(const float3& incoming, const float3& outgoing) {
-  if (!math::localSameHemisphere(incoming, outgoing)) {
-    return 0.0f;
-  }
-
-  return math::cosineSampleHemispherePDF(outgoing);
+  int sameHemis = math::localSameHemisphere(incoming, outgoing);
+  return sameHemis * math::cosineSampleHemispherePDF(outgoing);
 }
 
 RT_CALLABLE_PROGRAM void sampleLocal(

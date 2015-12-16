@@ -23,14 +23,14 @@ namespace math {
    * Determines whether a vec's magnitude is zero, within a small epsilon.
    */
   __device__ __inline__ bool isNearlyZero(const float3& v) {
-    return isNearlyZero(v.x * v.x + v.y * v.y + v.z * v.z);
+    return isNearlyZero(dot(v, v));
   }
 
   /**
    * Determines whether a vec's magnitude is exactly zero, with no epsilon check.
    */
   __device__ __inline__ bool isVectorExactlyZero(const float3& v) {
-    return v.x == 0.0f && v.y == 0.0f & v.z == 0.0f;
+    return v.x == 0.0f & v.y == 0.0f & v.z == 0.0f;
   }
 
   /**
@@ -207,7 +207,7 @@ namespace math {
 
     x = fabsf(2.0f * x); // Convert to the range [0, 2].
 
-    if (x > 1.0f && x < 2.0f) {
+    if (x > 1.0f & x < 2.0f) {
       return ((-B - 6.0f * C) * (x * x * x)
         + (6.0f * B + 30.0f * C) * (x * x)
         + (-12.0f * B - 48.0f * C) * x

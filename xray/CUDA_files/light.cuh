@@ -57,11 +57,8 @@ struct Light {
   __device__ optix::float3 emit(const optix::float3& dir, const optix::float3& n) const {
     // Only emit on the normal-facing side of objects, e.g. on the outside of a
     // sphere or on the normal side of a disc.
-    if (dot(dir, n) > XRAY_EPSILON) {
-      return optix::make_float3(0);
-    }
-
-    return color;
+    int outside = dot(dir, n) < -XRAY_EPSILON;
+    return outside * color;
   }
 
   __device__ optix::float3 directIlluminateByLightPDF(
@@ -81,7 +78,7 @@ struct Light {
       &lightPdf
     );
 
-    if (lightPdf > 0.0f && !math::isVectorExactlyZero(lightColor)) {
+    if (lightPdf > 0.0f & !math::isVectorExactlyZero(lightColor)) {
       // Evaluate material BSDF and PDF as well.
       optix::float3 bsdf;
       float bsdfPdf;
@@ -93,7 +90,7 @@ struct Light {
         &bsdfPdf
       );
 
-      if (bsdfPdf > 0.0f && !math::isVectorExactlyZero(bsdf)) {
+      if (bsdfPdf > 0.0f & !math::isVectorExactlyZero(bsdf)) {
         float lightWeight = math::powerHeuristic(1, lightPdf, 1, bsdfPdf);
         return (bsdf * lightColor)
           * fabsf(dot(isectNormalObj, outgoingWorld))
@@ -122,7 +119,7 @@ struct Light {
       &bsdfPdf
     );
 
-    if (bsdfPdf > 0.0f && !math::isVectorExactlyZero(bsdf)) {
+    if (bsdfPdf > 0.0f & !math::isVectorExactlyZero(bsdf)) {
       // Evaluate light PDF as well.
       optix::float3 lightColor;
       float lightPdf;
@@ -133,7 +130,7 @@ struct Light {
         &lightPdf
       );
 
-      if (lightPdf > 0.0f && !math::isVectorExactlyZero(lightColor)) {
+      if (lightPdf > 0.0f & !math::isVectorExactlyZero(lightColor)) {
         float bsdfWeight = math::powerHeuristic(1, bsdfPdf, 1, lightPdf);
         return bsdf * lightColor
           * fabsf(dot(isectNormalObj, outgoingWorld))
@@ -151,7 +148,6 @@ struct Light {
     float* pdfOut
   ) const {
     float pdf;
-    optix::float3 emittedColor;
 
     if (math::sphereContains(boundsOrigin, boundsRadius, point)) {
       // We're inside the bounding sphere, so sample sphere uniformly.
@@ -175,14 +171,8 @@ struct Light {
     NormalRayData checkData = NormalRayData::makeShadow(point, dirToLight);
     checkData.flags |= RAY_SKIP_MATERIAL_COMPUTATION;
     rtTrace(sceneRoot, pointToLight, checkData);
-    if (checkData.lastHitId != id) {
-      // No emission if the ray doesn't hit the light or is occluded
-      // (e.g. sampling doesn't exactly correspond with light).
-      emittedColor = optix::make_float3(0);
-    } else {
-      // Emits color if the ray does hit the light.
-      emittedColor = emit(dirToLight, checkData.hitNormal);
-    }
+    int idMatch = checkData.lastHitId == id;
+    optix::float3 emittedColor = idMatch * emit(dirToLight, checkData.hitNormal);
 
     *colorOut = emittedColor;
     *pdfOut = pdf;
@@ -197,9 +187,8 @@ struct Light {
   ) const {
     optix::float3 dirToLight;
     float pdf;
-    optix::float3 emittedColor;
 
-     if (math::sphereContains(boundsOrigin, boundsRadius, point)) {
+    if (math::sphereContains(boundsOrigin, boundsRadius, point)) {
       // We're inside the bounding sphere, so sample sphere uniformly.
       dirToLight = math::uniformSampleSphere(rng);
       pdf = math::uniformSampleSpherePDF();
@@ -226,14 +215,8 @@ struct Light {
     NormalRayData checkData = NormalRayData::makeShadow(point, dirToLight);
     checkData.flags |= RAY_SKIP_MATERIAL_COMPUTATION;
     rtTrace(sceneRoot, pointToLight, checkData);
-    if (checkData.lastHitId != id) {
-      // No emission if the ray doesn't hit the light or is occluded
-      // (e.g. sampling doesn't exactly correspond with light).
-      emittedColor = optix::make_float3(0);
-    } else {
-      // Emits color if the ray does hit the light.
-      emittedColor = emit(dirToLight, checkData.hitNormal);
-    }
+    int idMatch = checkData.lastHitId == id;
+    optix::float3 emittedColor = idMatch * emit(dirToLight, checkData.hitNormal);
 
     *dirToLightOut = dirToLight;
     *colorOut = emittedColor;

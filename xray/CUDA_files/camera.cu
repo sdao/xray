@@ -84,7 +84,7 @@ RT_PROGRAM void camera() {
     rtTrace(sceneRoot, ray, data);
 
     // End path if the beta is black, since no point in continuing.
-    if (data.flags & RAY_DEAD || math::isNearlyZero(data.beta)) {
+    if (data.flags & RAY_DEAD | math::isNearlyZero(data.beta)) {
       break;
     }
 

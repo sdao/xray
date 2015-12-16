@@ -32,21 +32,15 @@ RT_CALLABLE_PROGRAM __inline__ float evalPDFInternal(
 
 RT_CALLABLE_PROGRAM float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
    // See Lafortune & Willems <http://www.graphics.cornell.edu/~eric/Phong.html>.
-  if (!math::localSameHemisphere(incoming, outgoing)) {
-    return make_float3(0);
-  }
-
+  int sameHemis = math::localSameHemisphere(incoming, outgoing);
   float3 perfectReflect = make_float3(-incoming.x, -incoming.y, incoming.z);
-  return evalBSDFInternal(perfectReflect, outgoing);
+  return sameHemis * evalBSDFInternal(perfectReflect, outgoing);
 }
 
 __device__ float evalPDFLocal(const float3& incoming, const float3& outgoing) {
-  if (!math::localSameHemisphere(incoming, outgoing)) {
-    return 0.0f;
-  }
-
+  int sameHemis = math::localSameHemisphere(incoming, outgoing);
   float3 perfectReflect = make_float3(-incoming.x, -incoming.y, incoming.z);
-  return evalPDFInternal(perfectReflect, outgoing);
+  return sameHemis * evalPDFInternal(perfectReflect, outgoing);
 }
 
 __device__ void sampleLocal(

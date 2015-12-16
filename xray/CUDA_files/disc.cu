@@ -31,7 +31,7 @@ RT_PROGRAM void discIntersect(int) {
       float3 isectPoint = math::at(ray, d);
       float isectToOriginDist = length(isectPoint - origin);
       if (isectToOriginDist <= radiusOuter
-          && isectToOriginDist >= radiusInner) {
+          & isectToOriginDist >= radiusInner) {
         // In the disc.
         if (rtPotentialIntersection(d)) {
           isectNormal = normal;
