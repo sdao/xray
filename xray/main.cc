@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
     SDL_Surface* windowSurface = SDL_GetWindowSurface(window);
     
     std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point iterStartTime = startTime;
     while (true) {
       SDL_Event event;
       while (SDL_PollEvent(&event)) {}
@@ -76,11 +77,14 @@ int main(int argc, char* argv[]) {
       int frameNumber = scene.defaultCamera()->frameNumber();
       if (frameNumber % 50 == 0) {
         std::chrono::steady_clock::time_point endTime = std::chrono::steady_clock::now();
-        std::chrono::duration<float> runTime =
+        std::chrono::duration<float> iterRunTime =
+          std::chrono::duration_cast<std::chrono::duration<float>>(endTime - iterStartTime);
+        std::chrono::duration<float> totalRunTime =
           std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime);
-        float fps = 50.0f / runTime.count();
-        std::cout << " " << frameNumber << " (" << fps << " fps)" << std::endl;
-        startTime = endTime;
+        float fps = 50.0f / iterRunTime.count();
+        float totalSecs = totalRunTime.count();
+        std::cout << " " << frameNumber << " (" << fps << " fps, " << totalSecs << "s elapsed)" << std::endl;
+        iterStartTime = endTime;
       }
     }
   } catch (std::exception& e) {
