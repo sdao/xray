@@ -27,7 +27,7 @@ rtDeclareVariable(evalPDFLocalFunc, evalPDFLocal, , );
 typedef rtCallableProgramX<void(curandState* /* rng */, const float3& /* incoming */, float3* /* outgoingOut */, float3* /* bsdfOut */, float* /* pdfOut */)> sampleLocalFunc;
 rtDeclareVariable(sampleLocalFunc, sampleLocal, , ); 
 
-__device__ void sampleWorld(
+__device__ __inline__ void sampleWorld(
   curandState* rng,
   const float3& isectNormalObj,
   const float3& incoming,
@@ -66,7 +66,7 @@ __device__ void sampleWorld(
   *pdfOut = tempPdf;
 }
 
-__device__ void evalWorld(
+__device__ __inline__ void evalWorld(
   const optix::float3& isectNormalObj,
   const optix::float3& incomingWorld,
   const optix::float3& outgoingWorld,
@@ -97,7 +97,7 @@ __device__ void evalWorld(
   *pdfOut = evalPDFLocal(incomingLocal, outgoingLocal);
 }
 
-__device__ optix::float3 uniformSampleOneLight(
+__device__ __inline__ optix::float3 uniformSampleOneLight(
   const NormalRayData& data,
   const optix::float3& isectNormalObj,
   const optix::float3& isectPos
@@ -115,7 +115,7 @@ __device__ optix::float3 uniformSampleOneLight(
   );
 }
 
-__device__ void scatter(NormalRayData& rayData, float3 normal, float3 pos) {
+__device__ __inline__ void scatter(NormalRayData& rayData, float3 normal, float3 pos) {
   float3 outgoingWorld;
   float3 bsdf;
   float pdf;

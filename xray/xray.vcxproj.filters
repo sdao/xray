@@ -25,8 +25,8 @@
     <CudaCompile Include="CUDA_files\phong.cu">
       <Filter>CUDA_files\materials</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\anyhit.cu">
-      <Filter>CUDA_files</Filter>
+    <CudaCompile Include="CUDA_files\bsdf.cu">
+      <Filter>CUDA_files\materials</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
@@ -89,9 +89,6 @@
     <ClInclude Include="dielectric.h" />
     <ClInclude Include="phong.h" />
     <ClInclude Include="noreflect.h" />
-    <ClInclude Include="CUDA_files\bsdf.cu">
-      <Filter>CUDA_files\materials</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

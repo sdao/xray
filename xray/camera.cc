@@ -139,10 +139,5 @@ void Camera::render() {
   _ctx["frameNumber"]->setUint(_frame);
   _ctx->launch(CAMERA_TRACE, _w, _h);
   _ctx->launch(CAMERA_COMMIT, _w, _h);
-
-  optix::float3* raw = static_cast<optix::float3*>(_raw->map());
-
-  _raw->unmap();
-
   _frame++;
 }
