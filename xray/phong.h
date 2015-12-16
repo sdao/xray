@@ -10,8 +10,9 @@ class Phong : public Material {
   optix::float3 _color;
 
 protected:
-  virtual std::string getClosestHitPtxFile() const override;
-  virtual std::string getClosestHitProgram() const override;
+  virtual std::string getPtxFile() const override;
+  virtual bool doesReflect() const override;
+  virtual bool shouldDirectIlluminate() const override;
 
 public:
   Phong(Xray* xray, float e, optix::float3 c);

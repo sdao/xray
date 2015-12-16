@@ -5,7 +5,7 @@
 /** A very small nonzero value. */
 #define XRAY_VERY_SMALL 0.0001f
 /** An extremely small nonzero value. */
-#define XRAY_EXTREMELY_SMALL 0.000000000001f
+#define XRAY_EPSILON 0.000000000001f
 /** Pi/4 as a float. **/
 #define XRAY_PI_4 0.7853981633974483f
 /** 1/Pi as a float. */
@@ -20,6 +20,11 @@
 enum RayTypes {
   RAY_TYPE_NORMAL = 0,
   RAY_TYPE_SHADOW = 1
+};
+
+enum MaterialFlags {
+  MATERIAL_REFLECT = 0x1,
+  MATERIAL_DIRECT_ILLUMINATE = 0x2
 };
 
 namespace shared {

@@ -10,10 +10,14 @@ Lambert* Lambert::make(Xray* xray, const Node& n) {
   return new Lambert(xray, n.getFloat3("albedo"));
 }
 
-std::string Lambert::getClosestHitPtxFile() const {
+std::string Lambert::getPtxFile() const {
   return "PTX_files/lambert.cu.ptx";
 }
 
-std::string Lambert::getClosestHitProgram() const {
-  return "radiance";
+bool Lambert::doesReflect() const {
+  return true;
+}
+
+bool Lambert::shouldDirectIlluminate() const {
+  return true;
 }

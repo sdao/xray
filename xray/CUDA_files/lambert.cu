@@ -1,6 +1,12 @@
-#include "bsdf.cuh"
+#include <optix.h>
+#include <optix_cuda.h>
+#include <optix_world.h>
+#include "core.cuh"
+#include "math.cuh"
 
-__device__ float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
+rtDeclareVariable(float3, albedo, , );
+
+RT_CALLABLE_PROGRAM float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
   if (!math::localSameHemisphere(incoming, outgoing)) {
     return make_float3(0);
   }
@@ -8,7 +14,7 @@ __device__ float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) 
   return albedo * XRAY_INV_PI;
 }
 
-__device__ float evalPDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float evalPDFLocal(const float3& incoming, const float3& outgoing) {
   if (!math::localSameHemisphere(incoming, outgoing)) {
     return 0.0f;
   }
@@ -16,7 +22,7 @@ __device__ float evalPDFLocal(const float3& incoming, const float3& outgoing) {
   return math::cosineSampleHemispherePDF(outgoing);
 }
 
-__device__ void sampleLocal(
+RT_CALLABLE_PROGRAM void sampleLocal(
   curandState* rng,
   const float3& incoming,
   float3* outgoingOut,
@@ -28,8 +34,4 @@ __device__ void sampleLocal(
   *outgoingOut = outgoing;
   *bsdfOut = evalBSDFLocal(incoming, outgoing);
   *pdfOut = math::cosineSampleHemispherePDF(outgoing);
-}
-
-__device__ __inline__ bool shouldDirectIlluminate() {
-  return true;
 }

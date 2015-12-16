@@ -1,21 +1,25 @@
-#include "bsdf.cuh"
+#include <optix.h>
+#include <optix_cuda.h>
+#include <optix_world.h>
+#include "core.cuh"
+#include "math.cuh"
 
 rtDeclareVariable(float, r0, , ); /**< The cached R(0) value for Schlick's approximation. */
 rtDeclareVariable(float, etaEntering, , ); /**< The refraction ratio nVac / nMaterial. */
 rtDeclareVariable(float, etaExiting, , ); /**< Inverse of etaEntering (nMaterial / nVac). */
 rtDeclareVariable(float3, color, , );
 
-__device__ float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
   // Probabilistically, we are never going to get the exact matching
   // incoming and outgoing vectors.
   return make_float3(0);
 }
 
-__device__ float evalPDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float evalPDFLocal(const float3& incoming, const float3& outgoing) {
   return 0.0f;
 }
 
-__device__ void sampleLocal(
+RT_CALLABLE_PROGRAM void sampleLocal(
   curandState* rng,
   const float3& incoming,
   float3* outgoingOut,
@@ -99,8 +103,4 @@ __device__ void sampleLocal(
     *bsdfOut = color * refr / math::absCosTheta(refractVector);
     *pdfOut = probRefr;
   }
-}
-
-__device__ __inline__ bool shouldDirectIlluminate() {
-  return false;
 }

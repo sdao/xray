@@ -30,9 +30,9 @@ __device__ void sampleWorld(
 #endif
 
 struct Light {
+  optix::float3 color;
   optix::float3 boundsOrigin;
   float boundsRadius;
-  optix::float3 color;
   int id;
 
   __host__ static Light* make(optix::float3 c) {
@@ -57,7 +57,7 @@ struct Light {
   __device__ optix::float3 emit(const optix::float3& dir, const optix::float3& n) const {
     // Only emit on the normal-facing side of objects, e.g. on the outside of a
     // sphere or on the normal side of a disc.
-    if (dot(dir, n) > XRAY_EXTREMELY_SMALL) {
+    if (dot(dir, n) > XRAY_EPSILON) {
       return optix::make_float3(0);
     }
 
@@ -172,7 +172,7 @@ struct Light {
     }
 
     optix::Ray pointToLight = optix::make_Ray(point + dirToLight * XRAY_VERY_SMALL, dirToLight, RAY_TYPE_NORMAL, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
-    NormalRayData checkData = NormalRayData::make(point, dirToLight, nullptr); // nullptr OK because no material evaluation.
+    NormalRayData checkData = NormalRayData::makeShadow(point, dirToLight);
     checkData.flags |= RAY_SKIP_MATERIAL_COMPUTATION;
     rtTrace(sceneRoot, pointToLight, checkData);
     if (checkData.lastHitId != id) {
@@ -223,7 +223,7 @@ struct Light {
     }
      
     optix::Ray pointToLight = optix::make_Ray(point + dirToLight * XRAY_VERY_SMALL, dirToLight, RAY_TYPE_NORMAL, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
-    NormalRayData checkData = NormalRayData::make(point, dirToLight, nullptr);
+    NormalRayData checkData = NormalRayData::makeShadow(point, dirToLight);
     checkData.flags |= RAY_SKIP_MATERIAL_COMPUTATION;
     rtTrace(sceneRoot, pointToLight, checkData);
     if (checkData.lastHitId != id) {

@@ -13,9 +13,6 @@
     <CudaCompile Include="CUDA_files\constant.cu">
       <Filter>CUDA_files\materials</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\normaltest.cu">
-      <Filter>CUDA_files\materials</Filter>
-    </CudaCompile>
     <CudaCompile Include="CUDA_files\lambert.cu">
       <Filter>CUDA_files\materials</Filter>
     </CudaCompile>
@@ -39,13 +36,11 @@
     <ClCompile Include="geom.cc" />
     <ClCompile Include="camera.cc" />
     <ClCompile Include="material.cc" />
-    <ClCompile Include="normaltest.cc" />
     <ClCompile Include="instance.cc" />
     <ClCompile Include="node.cc" />
     <ClCompile Include="scene.cc" />
     <ClCompile Include="xray.cc" />
     <ClCompile Include="main.cc" />
-    <ClCompile Include="constant.cc" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.cmdline.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.config_file.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.convert.cpp" />
@@ -61,6 +56,7 @@
     <ClCompile Include="light.cc" />
     <ClCompile Include="dielectric.cc" />
     <ClCompile Include="phong.cc" />
+    <ClCompile Include="noreflect.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="optix_helpers.h">
@@ -78,12 +74,10 @@
     <ClInclude Include="CUDA_files\core.cuh">
       <Filter>CUDA_files</Filter>
     </ClInclude>
-    <ClInclude Include="normaltest.h" />
     <ClInclude Include="instance.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="xray.h" />
-    <ClInclude Include="constant.h" />
     <ClInclude Include="CUDA_files\shared.cuh">
       <Filter>CUDA_files</Filter>
     </ClInclude>
@@ -92,14 +86,12 @@
       <Filter>CUDA_files</Filter>
     </ClInclude>
     <ClInclude Include="light.h" />
-    <ClInclude Include="CUDA_files\basematerial.cuh">
-      <Filter>CUDA_files\materials</Filter>
-    </ClInclude>
-    <ClInclude Include="CUDA_files\bsdf.cuh">
-      <Filter>CUDA_files\materials</Filter>
-    </ClInclude>
     <ClInclude Include="dielectric.h" />
     <ClInclude Include="phong.h" />
+    <ClInclude Include="noreflect.h" />
+    <ClInclude Include="CUDA_files\bsdf.cu">
+      <Filter>CUDA_files\materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

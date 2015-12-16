@@ -16,8 +16,9 @@ class Dielectric : public Material {
   static float schickR0(float ior);
 
 protected:
-  virtual std::string getClosestHitPtxFile() const override;
-  virtual std::string getClosestHitProgram() const override;
+  virtual std::string getPtxFile() const override;
+  virtual bool doesReflect() const override;
+  virtual bool shouldDirectIlluminate() const override;
 
 public:
   Dielectric(Xray* xray, float ior = IOR_GLASS, optix::float3 c = optix::make_float3(1));

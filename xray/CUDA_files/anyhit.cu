@@ -4,9 +4,9 @@
 #include <optixu/optixu_math_namespace.h>
 #include "core.cuh"
 
-rtDeclareVariable(ShadowRayData, shadowRayData, rtPayload, );
+rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
 
 RT_PROGRAM void anyHit() {
-	shadowRayData.hit = true;
+	normalRayData.flags &= ~RAY_DEAD;
   rtTerminateRay();
 }

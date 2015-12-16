@@ -84,7 +84,7 @@ RT_PROGRAM void camera() {
     rtTrace(sceneRoot, ray, data);
 
     // End path if the beta is black, since no point in continuing.
-    if (math::isNearlyZero(data.beta)) {
+    if (data.flags & RAY_DEAD || math::isNearlyZero(data.beta)) {
       break;
     }
 
@@ -126,10 +126,10 @@ RT_PROGRAM void commit() {
   float posX = launchIndex.x;
   float posY = launchIndex.y;
 
-  int minX = clamp(int(ceilf(posX - FILTER_WIDTH - XRAY_EXTREMELY_SMALL)), 0, int(launchDim.x - 1));
-  int maxX = clamp(int(floorf(posX + FILTER_WIDTH + XRAY_EXTREMELY_SMALL)), 0, int(launchDim.x - 1));
-  int minY = clamp(int(ceilf(posY - FILTER_WIDTH - XRAY_EXTREMELY_SMALL)), 0, int(launchDim.y - 1));
-  int maxY = clamp(int(floorf(posY + FILTER_WIDTH + XRAY_EXTREMELY_SMALL)), 0, int(launchDim.y - 1));
+  int minX = clamp(int(ceilf(posX - FILTER_WIDTH - XRAY_VERY_SMALL)), 0, int(launchDim.x - 1));
+  int maxX = clamp(int(floorf(posX + FILTER_WIDTH + XRAY_VERY_SMALL)), 0, int(launchDim.x - 1));
+  int minY = clamp(int(ceilf(posY - FILTER_WIDTH - XRAY_VERY_SMALL)), 0, int(launchDim.y - 1));
+  int maxY = clamp(int(floorf(posY + FILTER_WIDTH + XRAY_VERY_SMALL)), 0, int(launchDim.y - 1));
   
   float4 currentAccum = accumBuffer[launchIndex];
 

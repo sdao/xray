@@ -8,27 +8,24 @@
 
 using namespace optix;
 
-rtDeclareVariable(Light, light, , ); 
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
 rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
 rtDeclareVariable(float, isectDist, rtIntersectionDistance, );
 rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
 rtDeclareVariable(int, isectHitId, attribute isectHitId, );
+rtDeclareVariable(Light, light, , ); 
 rtDeclareVariable(int, numLights, , ); 
+rtDeclareVariable(int, materialFlags, , );
 rtBuffer<Light, 1> lightsBuffer;
 
-__device__ float3 evalBSDFLocal(const float3& incoming, const float3& outgoing);
-__device__ float evalPDFLocal(const float3& incoming, const float3& outgoing);
-__device__ void sampleLocal(
-  curandState* rng,
-  const float3& incoming,
-  float3* outgoingOut,
-  float3* bsdfOut,
-  float* pdfOut
-);
+typedef rtCallableProgramX<float3(const float3& /* incoming */, const float3& /* outgoing */)> evalBSDFLocalFunc;
+rtDeclareVariable(evalBSDFLocalFunc, evalBSDFLocal, , ); 
 
-__device__ void scatter(NormalRayData& rayData, float3 normal, float3 pos);
-__device__ __inline__ bool shouldDirectIlluminate();
+typedef rtCallableProgramX<float(const float3& /* incoming */, const float3& /* outgoing */)> evalPDFLocalFunc;
+rtDeclareVariable(evalPDFLocalFunc, evalPDFLocal, , ); 
+
+typedef rtCallableProgramX<void(curandState* /* rng */, const float3& /* incoming */, float3* /* outgoingOut */, float3* /* bsdfOut */, float* /* pdfOut */)> sampleLocalFunc;
+rtDeclareVariable(sampleLocalFunc, sampleLocal, , ); 
 
 __device__ void sampleWorld(
   curandState* rng,
@@ -118,11 +115,28 @@ __device__ optix::float3 uniformSampleOneLight(
   );
 }
 
-RT_PROGRAM void radiance() {
-  normalRayData.lastHitId = isectHitId;
-  normalRayData.hitNormal = isectNormal;
+__device__ void scatter(NormalRayData& rayData, float3 normal, float3 pos) {
+  float3 outgoingWorld;
+  float3 bsdf;
+  float pdf;
+  sampleWorld(rayData.rng, normal, -rayData.direction, &outgoingWorld, &bsdf, &pdf);
 
+  float3 scale;
+  if (pdf > 0.0f) {
+    scale = bsdf * fabsf(dot(normal, outgoingWorld)) / pdf;
+  } else {
+    scale = make_float3(0, 0, 0);
+  }
+
+  rayData.origin = pos + outgoingWorld * XRAY_VERY_SMALL;
+  rayData.direction = outgoingWorld;
+  rayData.beta *= scale;
+}
+
+RT_PROGRAM void radiance() {
   if (normalRayData.flags & RAY_SKIP_MATERIAL_COMPUTATION) {
+    normalRayData.hitNormal = isectNormal;
+    normalRayData.lastHitId = isectHitId;
     return;
   }
 
@@ -140,7 +154,7 @@ RT_PROGRAM void radiance() {
   }
   
   // Next event estimation with light at next step.
-  if (shouldDirectIlluminate()) {
+  if (materialFlags & MATERIAL_DIRECT_ILLUMINATE) {
     normalRayData.radiance += normalRayData.beta * uniformSampleOneLight(normalRayData, isectNormalObj, isectPos);
     normalRayData.flags |= RAY_DID_DIRECT_ILLUMINATE;
   } else {
@@ -148,5 +162,9 @@ RT_PROGRAM void radiance() {
   }
 
   // Material evaluation at current step.
-  scatter(normalRayData, isectNormalObj, isectPos);
+  if (materialFlags & MATERIAL_REFLECT) {
+    scatter(normalRayData, isectNormalObj, isectPos);
+  } else {
+    normalRayData.flags |= RAY_DEAD;
+  }
 }

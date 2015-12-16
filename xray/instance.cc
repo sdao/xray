@@ -1,5 +1,5 @@
 #include "instance.h"
-#include "constant.h"
+#include "noreflect.h"
 #include "CUDA_files/light.cuh"
 
 Instance::Instance(Xray* xray, const Geom* g, const Material* m, const AreaLight* l, int id)
@@ -12,7 +12,8 @@ Instance::Instance(Xray* xray, const Geom* g, const Material* m, const AreaLight
     if (m) {
       _instance->setMaterial(0, m->getMaterial());
     } else {
-      _instance->setMaterial(0, Constant(xray, optix::make_float3(0)).getMaterial());
+      NoReflect nr(xray);
+      _instance->setMaterial(0, nr.getMaterial());
     }
 
     if (l) {

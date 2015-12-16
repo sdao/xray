@@ -13,12 +13,16 @@ Dielectric* Dielectric::make(Xray* xray, const Node& n) {
   return new Dielectric(xray, n.getFloat("ior"), n.getFloat3("color"));
 }
 
-std::string Dielectric::getClosestHitPtxFile() const {
+std::string Dielectric::getPtxFile() const {
   return "PTX_files/dielectric.cu.ptx";
 }
 
-std::string Dielectric::getClosestHitProgram() const {
-  return "radiance";
+bool Dielectric::doesReflect() const {
+  return true;
+}
+
+bool Dielectric::shouldDirectIlluminate() const {
+  return false;
 }
 
 float Dielectric::schickR0(float ior) {

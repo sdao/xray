@@ -5,17 +5,31 @@ Material::Material(optix::Context ctx) : _ctx(ctx), _material(ctx->createMateria
 
 Material::~Material() {}
 
-std::string Material::getAnyHitPtxFile() const {
-  return "PTX_files/anyhit.cu.ptx";
+std::string Material::getEvalBSDFLocalProgram() const {
+  return "evalBSDFLocal";
 }
 
-std::string Material::getAnyHitProgram() const {
-  return "anyHit";
+std::string Material::getEvalPDFLocalProgram() const {
+  return "evalPDFLocal";
+}
+
+std::string Material::getSampleLocalProgram() const {
+  return "sampleLocal";
 }
 
 void Material::freeze() {
-  _material->setClosestHitProgram(RAY_TYPE_NORMAL, _ctx->createProgramFromPTXFile(getClosestHitPtxFile(), getClosestHitProgram()));
-  _material->setAnyHitProgram(RAY_TYPE_SHADOW, _ctx->createProgramFromPTXFile(getAnyHitPtxFile(), getAnyHitProgram()));
+  int flags = 0;
+  if (doesReflect()) {
+    flags |= MATERIAL_REFLECT;
+  }
+  if (shouldDirectIlluminate()) {
+    flags |= MATERIAL_DIRECT_ILLUMINATE;
+  }
+  _material["materialFlags"]->setInt(flags);
+  _material->setClosestHitProgram(RAY_TYPE_NORMAL, _ctx->createProgramFromPTXFile("PTX_files/bsdf.cu.ptx", "radiance"));
+  _material["evalBSDFLocal"]->set(_ctx->createProgramFromPTXFile(getPtxFile(), getEvalBSDFLocalProgram()));
+  _material["evalPDFLocal"]->set(_ctx->createProgramFromPTXFile(getPtxFile(), getEvalPDFLocalProgram()));
+  _material["sampleLocal"]->set(_ctx->createProgramFromPTXFile(getPtxFile(), getSampleLocalProgram()));
   _frozen = true;
 }
 

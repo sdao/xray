@@ -15,10 +15,14 @@ Phong* Phong::make(Xray* xray, const Node& n) {
   return new Phong(xray, n.getFloat("exponent"), n.getFloat3("color"));
 }
 
-std::string Phong::getClosestHitPtxFile() const {
+std::string Phong::getPtxFile() const {
   return "PTX_files/phong.cu.ptx";
 }
 
-std::string Phong::getClosestHitProgram() const {
-  return "radiance";
+bool Phong::doesReflect() const {
+  return true;
+}
+
+bool Phong::shouldDirectIlluminate() const {
+  return true;
 }

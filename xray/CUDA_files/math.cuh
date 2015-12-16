@@ -9,14 +9,14 @@ namespace math {
   using namespace optix;
 
   __device__ __inline__ bool isPositive(float x) {
-    return x > XRAY_EXTREMELY_SMALL;
+    return x > XRAY_EPSILON;
   }
 
   /**
    * Determines whether a number is zero, within a small epsilon.
    */
   __device__ __inline__ bool isNearlyZero(float x) {
-    return fabsf(x) < XRAY_EXTREMELY_SMALL;
+    return fabsf(x) < XRAY_EPSILON;
   }
 
   /**

@@ -1,4 +1,8 @@
-#include "bsdf.cuh"
+#include <optix.h>
+#include <optix_cuda.h>
+#include <optix_world.h>
+#include "core.cuh"
+#include "math.cuh"
 
 rtDeclareVariable(float3, scaleBRDF, , );
 rtDeclareVariable(float, scaleProb, , );
@@ -6,7 +10,7 @@ rtDeclareVariable(float, exponent, , );
 rtDeclareVariable(float, invExponent, , );
 rtDeclareVariable(float3, color, , );
 
-__device__ __inline__ float3 evalBSDFInternal(
+RT_CALLABLE_PROGRAM __inline__ float3 evalBSDFInternal(
   const float3& perfectReflect,
   const float3& outgoing
 ) {
@@ -16,7 +20,7 @@ __device__ __inline__ float3 evalBSDFInternal(
   return scaleBRDF * cosAlphaPow;
 }
 
-__device__ __inline__ float evalPDFInternal(
+RT_CALLABLE_PROGRAM __inline__ float evalPDFInternal(
   const float3& perfectReflect,
   const float3& outgoing
 ) {
@@ -26,7 +30,7 @@ __device__ __inline__ float evalPDFInternal(
   return scaleProb * cosAlphaPow;
 }
 
-__device__ float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
    // See Lafortune & Willems <http://www.graphics.cornell.edu/~eric/Phong.html>.
   if (!math::localSameHemisphere(incoming, outgoing)) {
     return make_float3(0);
@@ -93,8 +97,4 @@ __device__ void sampleLocal(
   );
   *bsdfOut = evalBSDFInternal(perfectReflect, *outgoingOut);
   *pdfOut = evalPDFInternal(perfectReflect, *outgoingOut);
-}
-
-__device__ __inline__ bool shouldDirectIlluminate() {
-  return true;
 }

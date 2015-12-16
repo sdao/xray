@@ -1,7 +1,6 @@
 #include "scene.h"
 #include "camera.h"
 #include "material.h"
-#include "normaltest.h"
 #include "dielectric.h"
 #include "lambert.h"
 #include "phong.h"

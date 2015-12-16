@@ -13,10 +13,12 @@ protected:
   optix::Context _ctx;
   optix::Material _material;
 
-  virtual std::string getClosestHitPtxFile() const = 0;
-  virtual std::string getClosestHitProgram() const = 0;
-  virtual std::string getAnyHitPtxFile() const;
-  virtual std::string getAnyHitProgram() const;
+  virtual std::string getPtxFile() const = 0;
+  virtual std::string getEvalBSDFLocalProgram() const;
+  virtual std::string getEvalPDFLocalProgram() const;
+  virtual std::string getSampleLocalProgram() const;
+  virtual bool doesReflect() const = 0;
+  virtual bool shouldDirectIlluminate() const = 0;
   void freeze();
 
 public:
