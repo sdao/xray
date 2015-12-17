@@ -32,9 +32,16 @@ rtDeclareVariable(uint2, launchIndex, rtLaunchIndex, );
 rtDeclareVariable(uint2, launchDim, rtLaunchDim, );
 
 /**
-  * The number of bounces at which a ray is subject to Russian Roulette.
+  * The number of bounces at which a ray is subject to Russian Roulette
+  * termination, stage 1 (less aggressive).
   */
-#define RUSSIAN_ROULETTE_DEPTH 5
+#define RUSSIAN_ROULETTE_DEPTH_1 5
+
+/**
+  * The number of bounces at which a ray is subject to Russian Roulette
+  * termination, stage 2 (more aggressive).
+  */
+#define RUSSIAN_ROULETTE_DEPTH_2 50
 
 /**
   * Limits any given sample to the given amount of radiance. This helps to
@@ -82,9 +89,17 @@ RT_PROGRAM void camera() {
     }
 
     // Do Russian Roulette if this path is "old".
-    if (depth >= RUSSIAN_ROULETTE_DEPTH) {
+    if (depth >= RUSSIAN_ROULETTE_DEPTH_1) {
       float rv = math::nextFloat(&rngState, 0.0f, 1.0f);
-      float probLive = luminanceCIE(data.beta);
+
+      float probLive;
+      if (depth >= RUSSIAN_ROULETTE_DEPTH_2) {
+        // More aggressive ray killing when ray is very old.
+        probLive = math::clampedLerp(0.25f, 0.75f, luminanceCIE(data.beta));
+      } else {
+        // Less aggressive ray killing.
+        probLive = math::clampedLerp(0.25f, 1.00f, luminanceCIE(data.beta));
+      }
 
       if (rv < probLive) {
         // The ray lives (more energy = more likely to live).
