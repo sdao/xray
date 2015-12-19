@@ -1,5 +1,5 @@
 #include "disc.h"
-#include "CUDA_files/shared.cuh"
+#include "cuda/shared.cuh"
 
 Disc::Disc(Xray* xray, optix::float3 origin, optix::float3 normal, float radiusOuter, float radiusInner)
   : Geom(xray->getContext()), _origin(origin), _normal(normal), _radiusOuter(radiusOuter), _radiusInner(radiusInner) {
@@ -26,7 +26,7 @@ unsigned Disc::getPrimitiveCount() const {
 }
 
 std::string Disc::getPtxFile() const {
-  return "PTX_files/disc.cu.ptx";
+  return "ptx/disc.cu.ptx";
 }
 
 std::string Disc::getIsectProgram() const {

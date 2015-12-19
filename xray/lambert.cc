@@ -11,7 +11,7 @@ Lambert* Lambert::make(Xray* xray, const Node& n) {
 }
 
 std::string Lambert::getPtxFile() const {
-  return "PTX_files/lambert.cu.ptx";
+  return "ptx/lambert.cu.ptx";
 }
 
 bool Lambert::doesReflect() const {

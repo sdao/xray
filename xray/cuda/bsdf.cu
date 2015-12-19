@@ -14,7 +14,7 @@ rtDeclareVariable(float, isectDist, rtIntersectionDistance, );
 rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
 rtDeclareVariable(int, isectHitId, attribute isectHitId, );
 rtDeclareVariable(Light, light, , ); 
-rtDeclareVariable(int, numLights, , ); 
+rtDeclareVariable(unsigned int, numLights, , ); 
 rtDeclareVariable(int, materialFlags, , );
 rtBuffer<Light, 1> lightsBuffer;
 

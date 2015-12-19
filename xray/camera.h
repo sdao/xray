@@ -4,7 +4,7 @@
 #include <optix_world.h>
 #include <optixu/optixu_math_namespace.h>
 #include <optixu/optixu_matrix_namespace.h>
-#include "CUDA_files/shared.cuh"
+#include "cuda/shared.cuh"
 #include "instance.h"
 #include "node.h"
 #include "xray.h"

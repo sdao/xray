@@ -42,18 +42,18 @@ Camera::Camera(
   _rng = _ctx->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_UNSIGNED_INT, ww, hh);
 
   // Set up OptiX ray and miss programs.
-  _cam = _ctx->createProgramFromPTXFile("PTX_files/camera.cu.ptx", "camera");
+  _cam = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "camera");
   _cam["xform"]->setMatrix4x4fv(false, _camToWorldXform.getData());
   _cam["focalPlaneOrigin"]->set3fv(&_focalPlaneOrigin.x);
   _cam["focalPlaneRight"]->setFloat(_focalPlaneRight);
   _cam["focalPlaneUp"]->setFloat(_focalPlaneUp);
   _cam["lensRadius"]->setFloat(_lensRadius);
 
-  _miss = _ctx->createProgramFromPTXFile("PTX_files/camera.cu.ptx", "miss");
+  _miss = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "miss");
   _miss["backgroundColor"]->setFloat(0, 0, 0);
 
-  _commit = _ctx->createProgramFromPTXFile("PTX_files/camera.cu.ptx", "commit");
-  _init = _ctx->createProgramFromPTXFile("PTX_files/camera.cu.ptx", "init");
+  _commit = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "commit");
+  _init = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "init");
 }
 
 Camera::~Camera() {
@@ -101,7 +101,7 @@ void Camera::prepare() {
   // Set up acceleration structures.
   std::vector<Light*> lightPtrs;
   optix::GeometryGroup group = _ctx->createGeometryGroup();
-  group->setChildCount(_objs.size());
+  group->setChildCount(unsigned(_objs.size()));
   for (int i = 0; i < _objs.size(); ++i) {
     const Instance* inst = _objs[i];
     optix::GeometryInstance g = inst->getGeometryInstance();
@@ -121,7 +121,7 @@ void Camera::prepare() {
   }
   _lights->unmap();
   _ctx["lightsBuffer"]->setBuffer(_lights);
-  _ctx["numLights"]->setInt(lightPtrs.size());
+  _ctx["numLights"]->setUint(unsigned(lightPtrs.size()));
 
   optix::Acceleration accel = _ctx->createAcceleration("Trbvh", "Bvh");
   group->setAcceleration(accel);

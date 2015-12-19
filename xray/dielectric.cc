@@ -14,7 +14,7 @@ Dielectric* Dielectric::make(Xray* xray, const Node& n) {
 }
 
 std::string Dielectric::getPtxFile() const {
-  return "PTX_files/dielectric.cu.ptx";
+  return "ptx/dielectric.cu.ptx";
 }
 
 bool Dielectric::doesReflect() const {

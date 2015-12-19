@@ -1,6 +1,6 @@
 #include "instance.h"
 #include "noreflect.h"
-#include "CUDA_files/light.cuh"
+#include "cuda/light.cuh"
 
 Instance::Instance(Xray* xray, const Geom* g, const Material* m, const AreaLight* l, int id)
   : _id(id) {

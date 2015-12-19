@@ -1,5 +1,5 @@
 #include "phong.h"
-#include "CUDA_files/shared.cuh"
+#include "cuda/shared.cuh"
 
 Phong::Phong(Xray* xray, float e, optix::float3 c)
   : Material(xray->getContext()), _exp(e), _color(c) {
@@ -16,7 +16,7 @@ Phong* Phong::make(Xray* xray, const Node& n) {
 }
 
 std::string Phong::getPtxFile() const {
-  return "PTX_files/phong.cu.ptx";
+  return "ptx/phong.cu.ptx";
 }
 
 bool Phong::doesReflect() const {

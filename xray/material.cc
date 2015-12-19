@@ -1,5 +1,5 @@
 #include "material.h"
-#include "CUDA_files/shared.cuh"
+#include "cuda/shared.cuh"
 
 Material::Material(optix::Context ctx) : _ctx(ctx), _material(ctx->createMaterial()) {}
 
@@ -26,7 +26,7 @@ void Material::freeze() {
     flags |= MATERIAL_DIRECT_ILLUMINATE;
   }
   _material["materialFlags"]->setInt(flags);
-  _material->setClosestHitProgram(RAY_TYPE_NORMAL, _ctx->createProgramFromPTXFile("PTX_files/bsdf.cu.ptx", "radiance"));
+  _material->setClosestHitProgram(RAY_TYPE_NORMAL, _ctx->createProgramFromPTXFile("ptx/bsdf.cu.ptx", "radiance"));
   _material["evalBSDFLocal"]->set(_ctx->createProgramFromPTXFile(getPtxFile(), getEvalBSDFLocalProgram()));
   _material["evalPDFLocal"]->set(_ctx->createProgramFromPTXFile(getPtxFile(), getEvalPDFLocalProgram()));
   _material["sampleLocal"]->set(_ctx->createProgramFromPTXFile(getPtxFile(), getSampleLocalProgram()));

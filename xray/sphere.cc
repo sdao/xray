@@ -23,7 +23,7 @@ unsigned Sphere::getPrimitiveCount() const {
 }
 
 std::string Sphere::getPtxFile() const {
-  return "PTX_files/sphere.cu.ptx";
+  return "ptx/sphere.cu.ptx";
 }
 
 std::string Sphere::getIsectProgram() const {

@@ -9,7 +9,7 @@ NoReflect* NoReflect::make(Xray* xray) {
 }
 
 std::string NoReflect::getPtxFile() const {
-  return "PTX_files/constant.cu.ptx";
+  return "ptx/constant.cu.ptx";
 }
 
 bool NoReflect::doesReflect() const {

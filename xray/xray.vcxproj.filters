@@ -1,32 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="CUDA_files\disc.cu">
-      <Filter>CUDA_files\geoms</Filter>
+    <CudaCompile Include="cuda\camera.cu">
+      <Filter>cuda</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\sphere.cu">
-      <Filter>CUDA_files\geoms</Filter>
+    <CudaCompile Include="cuda\bsdf.cu">
+      <Filter>cuda\materials</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\camera.cu">
-      <Filter>CUDA_files</Filter>
+    <CudaCompile Include="cuda\constant.cu">
+      <Filter>cuda\materials</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\constant.cu">
-      <Filter>CUDA_files\materials</Filter>
+    <CudaCompile Include="cuda\dielectric.cu">
+      <Filter>cuda\materials</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\lambert.cu">
-      <Filter>CUDA_files\materials</Filter>
+    <CudaCompile Include="cuda\lambert.cu">
+      <Filter>cuda\materials</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\dielectric.cu">
-      <Filter>CUDA_files\materials</Filter>
+    <CudaCompile Include="cuda\phong.cu">
+      <Filter>cuda\materials</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\mesh.cu">
-      <Filter>CUDA_files\geoms</Filter>
+    <CudaCompile Include="cuda\disc.cu">
+      <Filter>cuda\geoms</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\phong.cu">
-      <Filter>CUDA_files\materials</Filter>
+    <CudaCompile Include="cuda\mesh.cu">
+      <Filter>cuda\geoms</Filter>
     </CudaCompile>
-    <CudaCompile Include="CUDA_files\bsdf.cu">
-      <Filter>CUDA_files\materials</Filter>
+    <CudaCompile Include="cuda\sphere.cu">
+      <Filter>cuda\geoms</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
@@ -41,76 +41,119 @@
     <ClCompile Include="scene.cc" />
     <ClCompile Include="xray.cc" />
     <ClCompile Include="main.cc" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.cmdline.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.config_file.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.convert.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.options_description.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.parsers.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.positional_options.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.split.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.utf8_codecvt_facet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.value_semantic.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.variables_map.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.winmain.cpp" />
     <ClCompile Include="lambert.cc" />
     <ClCompile Include="light.cc" />
     <ClCompile Include="dielectric.cc" />
     <ClCompile Include="phong.cc" />
     <ClCompile Include="noreflect.cc" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.winmain.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.cmdline.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.config_file.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.convert.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.options_description.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.parsers.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.positional_options.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.split.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.utf8_codecvt_facet.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.value_semantic.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.variables_map.cpp">
+      <Filter>boost</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="optix_helpers.h">
+    <ClInclude Include="cuda\core.cuh">
+      <Filter>cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda\shared.cuh">
+      <Filter>cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda\math.cuh">
+      <Filter>cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda\light.cuh">
+      <Filter>cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="geom.h" />
-    <ClInclude Include="sphere.h" />
-    <ClInclude Include="CUDA_files\math.cuh">
-      <Filter>CUDA_files</Filter>
+    <ClInclude Include="dielectric.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="disc.h" />
-    <ClInclude Include="mesh.h" />
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="material.h" />
-    <ClInclude Include="CUDA_files\core.cuh">
-      <Filter>CUDA_files</Filter>
+    <ClInclude Include="disc.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="instance.h" />
-    <ClInclude Include="node.h" />
-    <ClInclude Include="scene.h" />
-    <ClInclude Include="xray.h" />
-    <ClInclude Include="CUDA_files\shared.cuh">
-      <Filter>CUDA_files</Filter>
+    <ClInclude Include="geom.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lambert.h" />
-    <ClInclude Include="CUDA_files\light.cuh">
-      <Filter>CUDA_files</Filter>
+    <ClInclude Include="instance.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="light.h" />
-    <ClInclude Include="dielectric.h" />
-    <ClInclude Include="phong.h" />
-    <ClInclude Include="noreflect.h" />
+    <ClInclude Include="lambert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="noreflect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="phong.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="xray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-    <Text Include="PTX_files\ReadMe_dir.txt">
-      <Filter>PTX_files</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="CUDA_files">
-      <UniqueIdentifier>{80a37067-ddce-493c-abc2-5b4d1ababb28}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="PTX_files">
-      <UniqueIdentifier>{7d1a8494-0e30-43da-8f82-c97c0092f2f9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{0d91650a-e98f-4f7d-9592-302a063a26bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CUDA_files\geoms">
+    <Filter Include="cuda">
+      <UniqueIdentifier>{80a37067-ddce-493c-abc2-5b4d1ababb28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cuda\geoms">
       <UniqueIdentifier>{0549cfc3-2387-4bff-a085-78077c139014}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CUDA_files\materials">
+    <Filter Include="cuda\materials">
       <UniqueIdentifier>{6a0adde6-3fc4-4f57-a800-607c88df5a61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="boost">
+      <UniqueIdentifier>{f827a3d3-dc6d-4e9d-951d-ecf255c74a4d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,7 @@
 #define NOMINMAX
 #include "xray.h"
 #include "node.h"
-#include "CUDA_files/light.cuh"
+#include "cuda/light.cuh"
 
 class AreaLight {
   optix::float3 _color;
