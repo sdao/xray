@@ -25,6 +25,7 @@ rtDeclareVariable(rtObject, sceneRoot, , );
 rtBuffer<float3, 3> rawBuffer;
 rtBuffer<float4, 2> accumBuffer;
 rtBuffer<uchar4, 2> imageBuffer;
+rtBuffer<unsigned int, 2> randBuffer;
 
 rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
 
@@ -56,7 +57,7 @@ rtDeclareVariable(uint2, launchDim, rtLaunchDim, );
 
 RT_PROGRAM void camera() {
   curandState rngState;
-  curand_init((frameNumber * launchDim.x * launchDim.y) + (launchIndex.x * launchDim.y) + launchIndex.y, 0, 0, &rngState);
+  curand_init(randBuffer[launchIndex], 0, 0, &rngState);
   
   float offsetX = math::nextFloat(&rngState, -FILTER_WIDTH, FILTER_WIDTH);
   float offsetY = math::nextFloat(&rngState, -FILTER_WIDTH, FILTER_WIDTH);
@@ -120,6 +121,7 @@ RT_PROGRAM void camera() {
 
   rawBuffer[make_uint3(SAMPLE_RADIANCE, launchIndex.x, launchIndex.y)] = data.radiance;
   rawBuffer[make_uint3(SAMPLE_POSITION, launchIndex.x, launchIndex.y)] = make_float3(posX, posY, 0);
+  randBuffer[launchIndex] = curand(&rngState);
 }
 
 RT_PROGRAM void commit() {

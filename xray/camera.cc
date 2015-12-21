@@ -1,6 +1,7 @@
 #include "camera.h"
 #include "math.h"
 #include "light.h"
+#include <random>
 
 Camera::Camera(
   Xray* xray,
@@ -40,6 +41,14 @@ Camera::Camera(
   _accum = _ctx->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, ww, hh);
   _image = _ctx->createBuffer(RT_BUFFER_OUTPUT, RT_FORMAT_UNSIGNED_BYTE4, ww, hh);
   _rng = _ctx->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_UNSIGNED_INT, ww, hh);
+
+  std::mt19937 rng(42);
+  std::uniform_int_distribution<unsigned> unsignedDist;
+  unsigned int* rngMapped = static_cast<unsigned int*>(_rng->map());
+  for (int i = 0; i < ww * hh; ++i) {
+    rngMapped[i] = unsignedDist(rng);
+  }
+  _rng->unmap();
 
   // Set up OptiX ray and miss programs.
   _cam = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "camera");
@@ -92,7 +101,7 @@ void Camera::prepare() {
   _ctx["rawBuffer"]->setBuffer(_raw);
   _ctx["accumBuffer"]->setBuffer(_accum);
   _ctx["imageBuffer"]->setBuffer(_image);
-  _ctx["rngBuffer"]->setBuffer(_rng);
+  _ctx["randBuffer"]->setBuffer(_rng);
   _ctx->setRayGenerationProgram(CAMERA_TRACE, _cam);
   _ctx->setRayGenerationProgram(CAMERA_COMMIT, _commit);
   _ctx->setRayGenerationProgram(CAMERA_INIT, _init);
