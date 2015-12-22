@@ -18,7 +18,8 @@ Camera::Camera(
     _camToWorldXform(xform),
     _w(ww), _h(hh),
     _objs(objs),
-    _frame(0)
+    _frame(0),
+    _needReset(false)
 {
   // Calculate ray-tracing vectors.
   float halfFocalPlaneUp;
@@ -145,8 +146,19 @@ void Camera::prepare() {
 }
 
 void Camera::render() {
+  if (_needReset) {
+    _ctx->launch(CAMERA_INIT, _w, _h);
+    _needReset = false;
+  }
+
   _ctx["frameNumber"]->setUint(_frame);
   _ctx->launch(CAMERA_TRACE, _w, _h);
   _ctx->launch(CAMERA_COMMIT, _w, _h);
   _frame++;
+}
+
+void Camera::translate(optix::float3 v) {
+  _camToWorldXform = optix::Matrix4x4::translate(v) * _camToWorldXform;
+  _cam["xform"]->setMatrix4x4fv(false, _camToWorldXform.getData());
+  _needReset = true;
 }

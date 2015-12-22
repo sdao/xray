@@ -36,11 +36,13 @@ class Camera {
 
   const float _focalLength; /**< The distance from the eye to the focal plane. */
   const float _lensRadius; /**< The radius of the lens opening. */
-  const optix::Matrix4x4 _camToWorldXform; /**< Transform from camera to world space. */
+  optix::Matrix4x4 _camToWorldXform; /**< Transform from camera to world space. */
 
   float _focalPlaneUp; /**< The height of the focal plane. */
   float _focalPlaneRight; /**< The width of the focal plane. */
   optix::float3 _focalPlaneOrigin; /**< The origin (corner) of the focal plane. */
+
+  bool _needReset;
 
 public:
   Camera(
@@ -64,5 +66,7 @@ public:
 
   void prepare();
   void render();
+
+  void translate(optix::float3 v);
 };
 

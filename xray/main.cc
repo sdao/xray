@@ -55,9 +55,26 @@ int main(int argc, char* argv[]) {
     
     std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point iterStartTime = startTime;
+    bool down = false;
+    int yOriginal;
     while (true) {
+      int yOffset = 0;
       SDL_Event event;
-      while (SDL_PollEvent(&event)) {}
+      while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+          down = true;
+          yOriginal = event.button.y;
+        } else if (event.type == SDL_MOUSEBUTTONUP) {
+          down = false;
+        } else if (event.type == SDL_MOUSEMOTION && down) {
+          yOffset = event.motion.y - yOriginal;
+        }
+      }
+
+      if (abs(yOffset) > 1) {
+        yOriginal += yOffset;
+        scene.defaultCamera()->translate(optix::make_float3(0, 0, yOffset * 0.25f));
+      }
 
       scene.defaultCamera()->render();
 
