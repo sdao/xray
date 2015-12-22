@@ -27,6 +27,8 @@ rtDeclareVariable(evalPDFLocalFunc, evalPDFLocal, , );
 typedef rtCallableProgramX<void(curandState* /* rng */, const float3& /* incoming */, float3* /* outgoingOut */, float3* /* bsdfOut */, float* /* pdfOut */)> sampleLocalFunc;
 rtDeclareVariable(sampleLocalFunc, sampleLocal, , ); 
 
+#define ENABLE_DIRECT_ILLUMINATION 0
+
 __device__ __inline__ void sampleWorld(
   curandState* rng,
   const float3& isectNormalObj,
@@ -149,16 +151,23 @@ RT_PROGRAM void radiance() {
   float3 isectPos = normalRayData.origin + normalRayData.direction * isectDist;
 
   // Regular illumination on light at current step.
+#if ENABLE_DIRECT_ILLUMINATION
   int lume = !(normalRayData.flags & RAY_DID_DIRECT_ILLUMINATE) & (light.id != -1);
   normalRayData.radiance += lume * normalRayData.beta * light.emit(normalRayData.direction, isectNormalObj);
+#else
+  int lume = (light.id != -1);
+  normalRayData.radiance += lume * normalRayData.beta * light.emit(normalRayData.direction, isectNormalObj);
+#endif
   
   // Next event estimation with light at next step.
+#if ENABLE_DIRECT_ILLUMINATION
   if (materialFlags & MATERIAL_DIRECT_ILLUMINATE) {
     normalRayData.radiance += normalRayData.beta * uniformSampleOneLight(normalRayData, isectNormalObj, isectPos);
     normalRayData.flags |= RAY_DID_DIRECT_ILLUMINATE;
   } else {
     normalRayData.flags &= ~RAY_DID_DIRECT_ILLUMINATE;
   }
+#endif
 
   // Material evaluation at current step.
   if (materialFlags & MATERIAL_REFLECT) {
