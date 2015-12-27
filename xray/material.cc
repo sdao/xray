@@ -26,7 +26,8 @@ void Material::freeze() {
     flags |= MATERIAL_DIRECT_ILLUMINATE;
   }
   _material["materialFlags"]->setInt(flags);
-  _material->setClosestHitProgram(RAY_TYPE_NORMAL, _ctx->createProgramFromPTXFile("ptx/bsdf.cu.ptx", "radiance"));
+  _material->setClosestHitProgram(RAY_TYPE_NORMAL, _ctx->createProgramFromPTXFile("ptx/scatter_nodirect.cu.ptx", "radiance"));
+  _material->setClosestHitProgram(RAY_TYPE_NEXT_EVENT_ESTIMATION, _ctx->createProgramFromPTXFile("ptx/scatter_direct.cu.ptx", "radiance"));
   _material["evalBSDFLocal"]->set(_ctx->createProgramFromPTXFile(getPtxFile(), getEvalBSDFLocalProgram()));
   _material["evalPDFLocal"]->set(_ctx->createProgramFromPTXFile(getPtxFile(), getEvalPDFLocalProgram()));
   _material["sampleLocal"]->set(_ctx->createProgramFromPTXFile(getPtxFile(), getSampleLocalProgram()));

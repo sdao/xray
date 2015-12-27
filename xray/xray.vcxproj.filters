@@ -4,9 +4,6 @@
     <CudaCompile Include="cuda\camera.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
-    <CudaCompile Include="cuda\bsdf.cu">
-      <Filter>cuda\materials</Filter>
-    </CudaCompile>
     <CudaCompile Include="cuda\constant.cu">
       <Filter>cuda\materials</Filter>
     </CudaCompile>
@@ -27,6 +24,12 @@
     </CudaCompile>
     <CudaCompile Include="cuda\sphere.cu">
       <Filter>cuda\geoms</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cuda\scatter_direct.cu">
+      <Filter>cuda\materials</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cuda\scatter_nodirect.cu">
+      <Filter>cuda\materials</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +140,9 @@
     </ClInclude>
     <ClInclude Include="xray.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda\bsdf.cuh">
+      <Filter>cuda\materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

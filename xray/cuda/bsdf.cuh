@@ -27,8 +27,6 @@ rtDeclareVariable(evalPDFLocalFunc, evalPDFLocal, , );
 typedef rtCallableProgramX<void(curandState* /* rng */, const float3& /* incoming */, float3* /* outgoingOut */, float3* /* bsdfOut */, float* /* pdfOut */)> sampleLocalFunc;
 rtDeclareVariable(sampleLocalFunc, sampleLocal, , ); 
 
-#define ENABLE_DIRECT_ILLUMINATION 0
-
 __device__ __inline__ void sampleWorld(
   curandState* rng,
   const float3& isectNormalObj,
