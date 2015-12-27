@@ -19,7 +19,7 @@ Camera::Camera(
     _w(ww), _h(hh),
     _objs(objs),
     _frame(0),
-    _needReset(false)
+    _needReset(true)
 {
   // Calculate ray-tracing vectors.
   float halfFocalPlaneUp;
@@ -106,7 +106,7 @@ void Camera::prepare() {
   _ctx->setRayGenerationProgram(CAMERA_TRACE, _cam);
   _ctx->setRayGenerationProgram(CAMERA_COMMIT, _commit);
   _ctx->setRayGenerationProgram(CAMERA_INIT, _init);
-  _ctx->setMissProgram(0, _miss);
+  _ctx->setMissProgram(CAMERA_TRACE, _miss);
 
   // Set up acceleration structures.
   std::vector<Light*> lightPtrs;
@@ -139,10 +139,9 @@ void Camera::prepare() {
 
   _ctx["sceneRoot"]->set(group);
 
-  // Validate, compile, and run.
+  // Validate and compile.
   _ctx->validate();
   _ctx->compile();
-  _ctx->launch(CAMERA_INIT, _w, _h);
 }
 
 void Camera::render() {
