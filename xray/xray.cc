@@ -1,9 +1,10 @@
 #include "xray.h"
+#include "camera.h"
 
 Xray::Xray() : _nextID(0) {
   _ctx = optix::Context::create();
-  _ctx->setRayTypeCount(2);
-  _ctx->setEntryPointCount(3);
+  _ctx->setRayTypeCount(RayTypes::RAY_TYPE_COUNT);
+  _ctx->setEntryPointCount(CameraMode::CAMERA_MODE_COUNT);
 }
 
 Xray::~Xray() {}

@@ -18,7 +18,7 @@ rtDeclareVariable(float3, focalPlaneOrigin, , ); // The lower-left corner of the
 rtDeclareVariable(float, focalPlaneRight, , ); // The vector pointing from the upper-left corner to the upper-right corner of the focal rectangle in camera space.
 rtDeclareVariable(float, focalPlaneUp, , );
 rtDeclareVariable(float, lensRadius, , );
-rtDeclareVariable(unsigned int, frameNumber, , );
+rtDeclareVariable(int, nextEventEstimation, , );
 rtDeclareVariable(float3, backgroundColor, , );
 
 rtDeclareVariable(rtObject, sceneRoot, , );
@@ -55,7 +55,7 @@ rtDeclareVariable(uint2, launchDim, rtLaunchDim, );
 /** Filter radius. */
 #define FILTER_WIDTH 2.0f
 
-RT_PROGRAM void camera() {
+__device__ void camera(int rayType) {
   curandState rngState;
   curand_init(randBuffer[launchIndex], 0, 0, &rngState);
   
@@ -81,7 +81,7 @@ RT_PROGRAM void camera() {
 
   NormalRayData data = NormalRayData::make(eyeWorld, dir, &rngState);
   for (int depth = 0; ; ++depth) {
-    optix::Ray ray = make_Ray(data.origin, data.direction, RAY_TYPE_NORMAL, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
+    optix::Ray ray = make_Ray(data.origin, data.direction, rayType, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
     rtTrace(sceneRoot, ray, data);
 
     // End path if the beta is black, since no point in continuing.
@@ -124,6 +124,14 @@ RT_PROGRAM void camera() {
   randBuffer[launchIndex] = curand(&rngState);
 }
 
+RT_PROGRAM void camera_nodirect() {
+  camera(RAY_TYPE_NORMAL);
+}
+
+RT_PROGRAM void camera_direct() {
+  camera(RAY_TYPE_NEXT_EVENT_ESTIMATION);
+}
+
 RT_PROGRAM void commit() {
   float posX = launchIndex.x;
   float posY = launchIndex.y;
@@ -145,6 +153,10 @@ RT_PROGRAM void commit() {
         posY - newPosition.y,
         FILTER_WIDTH
       );
+      if (!nextEventEstimation) {
+        // Weight samples w/ NEE (direct illum) 4x normal samples.
+        weight *= 0.25f;
+      }
 
       currentAccum.x += newRadiance.x * weight;
       currentAccum.y += newRadiance.y * weight;

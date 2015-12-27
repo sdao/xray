@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
         scene.defaultCamera()->translate(optix::make_float3(0, 0, yOffset * 0.25f));
       }
 
-      scene.defaultCamera()->render();
+      scene.defaultCamera()->render(!down);
 
       void* imageMapped = scene.defaultCamera()->imageBuffer()->map();
       SDL_LockSurface(windowSurface);

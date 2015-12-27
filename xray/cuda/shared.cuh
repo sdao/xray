@@ -19,7 +19,8 @@
 
 enum RayTypes {
   RAY_TYPE_NORMAL = 0,
-  RAY_TYPE_NEXT_EVENT_ESTIMATION = 1
+  RAY_TYPE_NEXT_EVENT_ESTIMATION = 1,
+  RAY_TYPE_COUNT = 2
 };
 
 enum MaterialFlags {

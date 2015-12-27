@@ -10,14 +10,17 @@
 #include "xray.h"
 
 enum CameraMode {
-  CAMERA_TRACE = 0,
-  CAMERA_COMMIT = 1,
-  CAMERA_INIT = 2
+  CAMERA_TRACE_NORMAL = 0,
+  CAMERA_TRACE_NEXT_EVENT_ESTIMATION = 1,
+  CAMERA_COMMIT = 2,
+  CAMERA_INIT = 3,
+  CAMERA_MODE_COUNT = 4
 };
 
 class Camera {
   mutable optix::Context _ctx;
   optix::Program _cam;
+  optix::Program _camNee;
   optix::Program _miss;
   optix::Program _commit;
   optix::Program _init;
@@ -65,7 +68,7 @@ public:
   unsigned int frameNumber() const;
 
   void prepare();
-  void render();
+  void render(bool nextEventEstimation = false);
 
   void translate(optix::float3 v);
 };

@@ -52,12 +52,19 @@ Camera::Camera(
   _rng->unmap();
 
   // Set up OptiX ray and miss programs.
-  _cam = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "camera");
+  _cam = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "camera_nodirect");
   _cam["xform"]->setMatrix4x4fv(false, _camToWorldXform.getData());
   _cam["focalPlaneOrigin"]->set3fv(&_focalPlaneOrigin.x);
   _cam["focalPlaneRight"]->setFloat(_focalPlaneRight);
   _cam["focalPlaneUp"]->setFloat(_focalPlaneUp);
   _cam["lensRadius"]->setFloat(_lensRadius);
+  
+  _camNee = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "camera_direct");
+  _camNee["xform"]->setMatrix4x4fv(false, _camToWorldXform.getData());
+  _camNee["focalPlaneOrigin"]->set3fv(&_focalPlaneOrigin.x);
+  _camNee["focalPlaneRight"]->setFloat(_focalPlaneRight);
+  _camNee["focalPlaneUp"]->setFloat(_focalPlaneUp);
+  _camNee["lensRadius"]->setFloat(_lensRadius);
 
   _miss = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "miss");
   _miss["backgroundColor"]->setFloat(0, 0, 0);
@@ -103,10 +110,12 @@ void Camera::prepare() {
   _ctx["accumBuffer"]->setBuffer(_accum);
   _ctx["imageBuffer"]->setBuffer(_image);
   _ctx["randBuffer"]->setBuffer(_rng);
-  _ctx->setRayGenerationProgram(CAMERA_TRACE, _cam);
+  _ctx->setRayGenerationProgram(CAMERA_TRACE_NORMAL, _cam);
+  _ctx->setRayGenerationProgram(CAMERA_TRACE_NEXT_EVENT_ESTIMATION, _camNee);
   _ctx->setRayGenerationProgram(CAMERA_COMMIT, _commit);
   _ctx->setRayGenerationProgram(CAMERA_INIT, _init);
-  _ctx->setMissProgram(CAMERA_TRACE, _miss);
+  _ctx->setMissProgram(CAMERA_TRACE_NORMAL, _miss);
+  _ctx->setMissProgram(CAMERA_TRACE_NEXT_EVENT_ESTIMATION, _miss);
 
   // Set up acceleration structures.
   std::vector<Light*> lightPtrs;
@@ -144,14 +153,14 @@ void Camera::prepare() {
   _ctx->compile();
 }
 
-void Camera::render() {
+void Camera::render(bool nextEventEstimation) {
   if (_needReset) {
     _ctx->launch(CAMERA_INIT, _w, _h);
     _needReset = false;
   }
 
-  _ctx["frameNumber"]->setUint(_frame);
-  _ctx->launch(CAMERA_TRACE, _w, _h);
+  _ctx["nextEventEstimation"]->setInt(0);
+  _ctx->launch(nextEventEstimation ? CAMERA_TRACE_NEXT_EVENT_ESTIMATION : CAMERA_TRACE_NORMAL, _w, _h);
   _ctx->launch(CAMERA_COMMIT, _w, _h);
   _frame++;
 }
@@ -159,5 +168,6 @@ void Camera::render() {
 void Camera::translate(optix::float3 v) {
   _camToWorldXform = optix::Matrix4x4::translate(v) * _camToWorldXform;
   _cam["xform"]->setMatrix4x4fv(false, _camToWorldXform.getData());
+  _camNee["xform"]->setMatrix4x4fv(false, _camToWorldXform.getData());
   _needReset = true;
 }
