@@ -55,7 +55,7 @@ rtDeclareVariable(uint2, launchDim, rtLaunchDim, );
 /** Filter radius. */
 #define FILTER_WIDTH 2.0f
 
-__device__ void camera(int rayType) {
+__device__ __inline__ void camera(int rayType) {
   curandState rngState;
   curand_init(randBuffer[launchIndex], 0, 0, &rngState);
   
