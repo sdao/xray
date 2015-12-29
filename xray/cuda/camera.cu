@@ -18,7 +18,7 @@ rtDeclareVariable(float3, focalPlaneOrigin, , ); // The lower-left corner of the
 rtDeclareVariable(float, focalPlaneRight, , ); // The vector pointing from the upper-left corner to the upper-right corner of the focal rectangle in camera space.
 rtDeclareVariable(float, focalPlaneUp, , );
 rtDeclareVariable(float, lensRadius, , );
-rtDeclareVariable(int, nextEventEstimation, , );
+rtDeclareVariable(float, commitWeight, , );
 rtDeclareVariable(float3, backgroundColor, , );
 
 rtDeclareVariable(rtObject, sceneRoot, , );
@@ -152,11 +152,7 @@ RT_PROGRAM void commit() {
         posX - newPosition.x,
         posY - newPosition.y,
         FILTER_WIDTH
-      );
-      if (!nextEventEstimation) {
-        // Weight samples w/ NEE (direct illum) 4x normal samples.
-        weight *= 0.25f;
-      }
+      ) * commitWeight;
 
       currentAccum.x += newRadiance.x * weight;
       currentAccum.y += newRadiance.y * weight;

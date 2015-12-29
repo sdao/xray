@@ -159,7 +159,7 @@ void Camera::render(bool nextEventEstimation) {
     _needReset = false;
   }
 
-  _ctx["nextEventEstimation"]->setInt(0);
+  _commit["commitWeight"]->setFloat(nextEventEstimation ? 1.0f : 0.25f);
   _ctx->launch(nextEventEstimation ? CAMERA_TRACE_NEXT_EVENT_ESTIMATION : CAMERA_TRACE_NORMAL, _w, _h);
   _ctx->launch(CAMERA_COMMIT, _w, _h);
   _frame++;
