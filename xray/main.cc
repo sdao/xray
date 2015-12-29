@@ -1,9 +1,66 @@
 #include <iostream>
 #include <SDL.h>
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 #include <chrono>
 #include "scene.h"
 #include "camera.h"
+#include "tinyexr/tinyexr.h"
+
+using boost::format;
+
+void writeToEXR(std::string fileName, optix::float4* data, int w, int h) {
+  std::vector<float> channelR(w * h);
+  std::vector<float> channelG(w * h);
+  std::vector<float> channelB(w * h);
+  for (int i = 0; i < w * h; ++i) {
+    const optix::float4& px = data[i];
+    channelR[i] = px.x / px.w;
+    channelG[i] = px.y / px.w;
+    channelB[i] = px.z / px.w;
+  }
+
+  EXRImage image;
+  InitEXRImage(&image);
+
+  const unsigned numChannels = 3;
+  image.num_channels = numChannels;
+
+  // Must be BGR(A) order, since most EXR viewers expect this channel order.
+  const char* channel_names[] = { "B", "G", "R" };
+
+  float* image_ptr[3] = {
+    channelB.data(), // B
+    channelG.data(), // G
+    channelR.data()  // R
+  };
+
+  image.channel_names = channel_names;
+  image.images = reinterpret_cast<unsigned char**>(image_ptr);
+  image.width = w;
+  image.height = h;
+  image.compression = TINYEXR_COMPRESSIONTYPE_NONE;
+
+  image.pixel_types = new int[sizeof(int) * numChannels];
+  image.requested_pixel_types = new int[sizeof(int) * numChannels];
+  for (int i = 0; i < image.num_channels; i++) {
+    image.pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // pixel type of input image
+    image.requested_pixel_types[i] = TINYEXR_PIXELTYPE_HALF; // pixel type of output image to be stored in .EXR
+  }
+
+  const char* err;
+  int ret = SaveMultiChannelEXRToFile(&image, fileName.c_str(), &err);
+
+  delete[] image.pixel_types;
+  delete[] image.requested_pixel_types;
+
+  if (ret != 0) {
+    throw std::runtime_error(
+      str(format("Cannot read string property '%1%'") % std::string(err))
+    );
+  }
+}
 
 int main(int argc, char* argv[]) {
   using namespace boost::program_options;
@@ -41,10 +98,9 @@ int main(int argc, char* argv[]) {
     std::string output = vars["output"].as<std::string>();
 
     Scene scene(input);
-
-    SDL_Init(SDL_INIT_VIDEO);
     scene.defaultCamera()->prepare();
 
+    SDL_Init(SDL_INIT_VIDEO);
     SDL_Window* window = SDL_CreateWindow(
       "xray",
       SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -68,42 +124,52 @@ int main(int argc, char* argv[]) {
           down = false;
         } else if (event.type == SDL_MOUSEMOTION && down) {
           yOffset = event.motion.y - yOriginal;
+        } else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE) {
+          goto finish;
         }
       }
 
+      // Move camera if the mouse-down offset > 1px.
       if (abs(yOffset) > 1) {
         yOriginal += yOffset;
         scene.defaultCamera()->translate(optix::make_float3(0, 0, yOffset * 0.25f));
       }
 
+      // Render here!
       scene.defaultCamera()->render(!down);
 
-      void* imageMapped = scene.defaultCamera()->imageBuffer()->map();
+      // Transfer current render to the screen.
       SDL_LockSurface(windowSurface);
+      void* imageMapped = scene.defaultCamera()->imageBuffer()->map();
       std::memcpy(
         windowSurface->pixels,
         imageMapped,
         scene.defaultCamera()->pixelWidth() * scene.defaultCamera()->pixelHeight() * 4
       );
-      SDL_UnlockSurface(windowSurface);
       scene.defaultCamera()->imageBuffer()->unmap();
-      
+      SDL_UnlockSurface(windowSurface);
       SDL_UpdateWindowSurface(window);
 
-      std::cout << ".";
+      // Update title with statistics.
       int frameNumber = scene.defaultCamera()->frameNumber();
-      if (frameNumber % 50 == 0) {
-        std::chrono::steady_clock::time_point endTime = std::chrono::steady_clock::now();
-        std::chrono::duration<float> iterRunTime =
-          std::chrono::duration_cast<std::chrono::duration<float>>(endTime - iterStartTime);
-        std::chrono::duration<float> totalRunTime =
-          std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime);
-        float fps = 50.0f / iterRunTime.count();
-        float totalSecs = totalRunTime.count();
-        std::cout << " " << frameNumber << " (" << fps << " fps, " << totalSecs << "s elapsed)" << std::endl;
-        iterStartTime = endTime;
-      }
+      std::chrono::steady_clock::time_point endTime = std::chrono::steady_clock::now();
+      std::chrono::duration<float> iterRunTime =
+        std::chrono::duration_cast<std::chrono::duration<float>>(endTime - iterStartTime);
+      std::chrono::duration<float> totalRunTime =
+        std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime);
+      float fps = 1.0f / iterRunTime.count();
+      float totalSecs = totalRunTime.count();
+      iterStartTime = endTime;
+
+      std::string title = str(format("xray [Iteration %1%, %2$.f fps, %3$.1f\" elapsed]") % frameNumber % fps % totalSecs);
+      SDL_SetWindowTitle(window, title.c_str());
     }
+
+finish:
+    // Save the output before exiting.
+    optix::float4* accumMapped = static_cast<optix::float4*>(scene.defaultCamera()->accumBuffer()->map());
+    writeToEXR(output, accumMapped, scene.defaultCamera()->pixelWidth(), scene.defaultCamera()->pixelHeight());
+    scene.defaultCamera()->accumBuffer()->unmap();
   } catch (std::exception& e) {
     std::cout << e.what() << std::endl;
     return 42;

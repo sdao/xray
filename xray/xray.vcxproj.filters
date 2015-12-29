@@ -82,6 +82,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_program_options.variables_map.cpp">
       <Filter>boost</Filter>
     </ClCompile>
+    <ClCompile Include="tinyexr\tinyexr.cc">
+      <Filter>tinyexr</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cuda\core.cuh">
@@ -144,6 +147,9 @@
     <ClInclude Include="cuda\bsdf.cuh">
       <Filter>cuda\materials</Filter>
     </ClInclude>
+    <ClInclude Include="tinyexr\tinyexr.h">
+      <Filter>tinyexr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -160,6 +166,9 @@
     </Filter>
     <Filter Include="boost">
       <UniqueIdentifier>{f827a3d3-dc6d-4e9d-951d-ecf255c74a4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tinyexr">
+      <UniqueIdentifier>{fe5ade50-5f15-4995-9b45-128a99aef0fd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

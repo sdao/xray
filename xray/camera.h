@@ -62,6 +62,7 @@ public:
 
   static Camera* make(Xray* xray, const Node& n);
 
+  optix::Buffer accumBuffer();
   optix::Buffer imageBuffer();
   int pixelWidth() const;
   int pixelHeight() const;

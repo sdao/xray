@@ -88,6 +88,10 @@ Camera* Camera::make(Xray* xray, const Node& n) {
   );
 }
 
+optix::Buffer Camera::accumBuffer() {
+  return _accum;
+}
+
 optix::Buffer Camera::imageBuffer() {
   return _image;
 }
