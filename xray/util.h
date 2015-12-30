@@ -36,4 +36,24 @@ namespace util {
     buffer->unmap();
   }
 
+  template<typename T>
+  inline optix::Buffer putUserBuffer(
+    optix::Context ctx,
+    std::vector<T*>& userPtrs
+  ) {
+    optix::Buffer buffer = ctx->createBuffer(
+      RT_BUFFER_INPUT,
+      RT_FORMAT_USER,
+      userPtrs.size()
+    );
+    buffer->setElementSize(sizeof(T));
+    util::withMappedBuffer<T>(buffer, [&](T* mapped, size_t len) {
+      for (int i = 0; i < len; ++i) {
+        mapped[i] = *userPtrs[i];
+      }
+    });
+
+    return buffer;
+  }
+
 }

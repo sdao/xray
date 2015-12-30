@@ -18,9 +18,10 @@
 #define XRAY_STERADIANS_PER_SPHERE XRAY_FOUR_PI
 
 enum RayTypes {
-  RAY_TYPE_NORMAL = 0,
+  RAY_TYPE_NO_NEXT_EVENT_ESTIMATION = 0,
   RAY_TYPE_NEXT_EVENT_ESTIMATION = 1,
-  RAY_TYPE_COUNT = 2
+  RAY_TYPE_SHADOW = 2,
+  RAY_TYPE_COUNT = 3
 };
 
 enum MaterialFlags {
@@ -31,6 +32,15 @@ enum MaterialFlags {
 namespace shared {
   using namespace optix;
 
+  /**
+   * Generates a transformation matrix representating a rotation followed by
+   * a translation.
+   *
+   * @param angle  the angle to rotate
+   * @param axis   the axis about which to rotate
+   * @param offset the translation offset
+   * @returns the transformation matrix
+   */
   __host__ __device__ __inline__
   Matrix4x4 rotationThenTranslation(float angle, float3 axis, float3 offset) {
     return Matrix4x4::translate(offset) * Matrix4x4::rotate(angle, axis);

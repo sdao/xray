@@ -1,3 +1,8 @@
+/**
+ * This is a standard Lambert (diffuse) material. It is wrapped by the Lambert
+ * class.
+ */
+
 #include <optix.h>
 #include <optix_cuda.h>
 #include <optix_world.h>
@@ -6,12 +11,18 @@
 
 rtDeclareVariable(float3, albedo, , );
 
-RT_CALLABLE_PROGRAM float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float3 evalBSDFLocal(
+  const float3& incoming,
+  const float3& outgoing
+) {
   int sameHemis = math::localSameHemisphere(incoming, outgoing);
   return sameHemis * albedo * XRAY_INV_PI;
 }
 
-RT_CALLABLE_PROGRAM float evalPDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float evalPDFLocal(
+  const float3& incoming,
+  const float3& outgoing
+) {
   int sameHemis = math::localSameHemisphere(incoming, outgoing);
   return sameHemis * math::cosineSampleHemispherePDF(outgoing);
 }

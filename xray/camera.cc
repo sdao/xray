@@ -33,10 +33,10 @@ Camera::Camera(
     halfFocalPlaneUp = halfFocalPlaneRight * float(_h) / float(_w);
   }
 
-  _focalPlaneUp = -2.0f * halfFocalPlaneUp;
-  _focalPlaneRight = 2.0f * halfFocalPlaneRight;
   _focalPlaneOrigin =
     optix::make_float3(-halfFocalPlaneRight, halfFocalPlaneUp, -_focalLength);
+  _focalPlaneSize =
+    optix::make_float2(2.0f * halfFocalPlaneRight, -2.0f * halfFocalPlaneUp);
   
   // Set up OptiX image buffers.
   _raw =
@@ -50,19 +50,22 @@ Camera::Camera(
   util::withMappedBuffer<unsigned int>(_rng, util::fillRandom);
 
   // Set up OptiX ray and miss programs.
-  _cam = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "camera_nodirect");
-  _cam["xform"]->setMatrix4x4fv(false, _camToWorldXform.getData());
-  _cam["focalPlaneOrigin"]->set3fv(&_focalPlaneOrigin.x);
-  _cam["focalPlaneRight"]->setFloat(_focalPlaneRight);
-  _cam["focalPlaneUp"]->setFloat(_focalPlaneUp);
-  _cam["lensRadius"]->setFloat(_lensRadius);
-  
-  _camNee = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "camera_direct");
-  _camNee["xform"]->setMatrix4x4fv(false, _camToWorldXform.getData());
-  _camNee["focalPlaneOrigin"]->set3fv(&_focalPlaneOrigin.x);
-  _camNee["focalPlaneRight"]->setFloat(_focalPlaneRight);
-  _camNee["focalPlaneUp"]->setFloat(_focalPlaneUp);
-  _camNee["lensRadius"]->setFloat(_lensRadius);
+  _cam = _ctx->createProgramFromPTXFile(
+    "ptx/camera.cu.ptx",
+    "camera_nodirect"
+  );
+  _camNee = _ctx->createProgramFromPTXFile(
+    "ptx/camera.cu.ptx",
+    "camera_direct"
+  );
+
+  optix::Program cams[2] = {_cam, _camNee};
+  for (optix::Program c : cams) {
+    c["xform"]->setMatrix4x4fv(false, _camToWorldXform.getData());
+    c["focalPlaneOrigin"]->set3fv(&_focalPlaneOrigin.x);
+    c["focalPlaneSize"]->set2fv(&_focalPlaneSize.x);
+    c["lensRadius"]->setFloat(_lensRadius);
+  }
 
   _miss = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "miss");
   _miss["backgroundColor"]->setFloat(0, 0, 0);
@@ -71,9 +74,7 @@ Camera::Camera(
   _init = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "init");
 }
 
-Camera::~Camera() {
-  _ctx->destroy();
-}
+Camera::~Camera() {}
 
 Camera* Camera::make(Xray* xray, const Node& n) {
   return new Camera(
@@ -83,7 +84,7 @@ Camera* Camera::make(Xray* xray, const Node& n) {
       n.getFloat3("rotateAxis"),
       n.getFloat3("translate")
     ),
-    n.getGeomInstanceList("objects"),
+    n.getInstanceList("objects"),
     n.getInt("width"), n.getInt("height"),
     n.getFloat("fov"), n.getFloat("focalLength"),
     n.getFloat("fStop")
@@ -116,43 +117,35 @@ void Camera::prepare() {
   _ctx["accumBuffer"]->setBuffer(_accum);
   _ctx["imageBuffer"]->setBuffer(_image);
   _ctx["randBuffer"]->setBuffer(_rng);
-  _ctx->setRayGenerationProgram(CAMERA_TRACE_NORMAL, _cam);
+  _ctx->setRayGenerationProgram(CAMERA_TRACE_NO_NEXT_EVENT_ESTIMATION, _cam);
   _ctx->setRayGenerationProgram(CAMERA_TRACE_NEXT_EVENT_ESTIMATION, _camNee);
   _ctx->setRayGenerationProgram(CAMERA_COMMIT, _commit);
   _ctx->setRayGenerationProgram(CAMERA_INIT, _init);
-  _ctx->setMissProgram(CAMERA_TRACE_NORMAL, _miss);
+  _ctx->setMissProgram(CAMERA_TRACE_NO_NEXT_EVENT_ESTIMATION, _miss);
   _ctx->setMissProgram(CAMERA_TRACE_NEXT_EVENT_ESTIMATION, _miss);
 
-  // Set up acceleration structures.
+  // Collect instances and set up acceleration structures.
+  std::vector<optix::GeometryInstance> geomPtrs;
   std::vector<Light*> lightPtrs;
-  optix::GeometryGroup group = _ctx->createGeometryGroup();
-  group->setChildCount(unsigned(_objs.size()));
-  for (int i = 0; i < _objs.size(); ++i) {
-    const Instance* inst = _objs[i];
+  for (const Instance* inst : _objs) {
     optix::GeometryInstance g = inst->getGeometryInstance();
-    Light* l = inst->getLightInstance();
+    geomPtrs.push_back(g);
 
-    group->setChild(i, inst->getGeometryInstance());
+    Light* l = inst->getLightInstance();
     if (l->id != -1) {
       lightPtrs.push_back(l);
     }
   }
-  _ctx["sceneRoot"]->set(group);
 
-  _lights =
-    _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_USER, lightPtrs.size());
-  _lights->setElementSize(sizeof(Light));
-  util::withMappedBuffer<Light>(_lights, [&](Light* buffer, size_t len) {
-    for (int i = 0; i < len; ++i) {
-      buffer[i] = *lightPtrs[i];
-    }
-  });
-  _ctx["lightsBuffer"]->setBuffer(_lights);
-  _ctx["numLights"]->setUint(unsigned(lightPtrs.size()));
-
+  optix::GeometryGroup group =
+    _ctx->createGeometryGroup(geomPtrs.begin(), geomPtrs.end());
   optix::Acceleration accel = _ctx->createAcceleration("Trbvh", "Bvh");
   group->setAcceleration(accel);
   accel->markDirty();
+  _ctx["sceneRoot"]->set(group);
+
+  _ctx["lightsBuffer"]->setBuffer(util::putUserBuffer<Light>(_ctx, lightPtrs));
+  _ctx["numLights"]->setUint(unsigned(lightPtrs.size()));
 
   // Validate and compile.
   _ctx->validate();
@@ -168,7 +161,7 @@ void Camera::render(bool nextEventEstimation) {
   if (nextEventEstimation) {
     _ctx->launch(CAMERA_TRACE_NEXT_EVENT_ESTIMATION, _w, _h);
   } else {
-    _ctx->launch(CAMERA_TRACE_NORMAL, _w, _h);
+    _ctx->launch(CAMERA_TRACE_NO_NEXT_EVENT_ESTIMATION, _w, _h);
   }
 
   _commit["commitWeight"]->setFloat(nextEventEstimation ? 1.0f : 0.25f);

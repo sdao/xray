@@ -28,12 +28,16 @@ void Material::freeze() {
   }
   _material["materialFlags"]->setInt(flags);
   _material->setClosestHitProgram(
-    RAY_TYPE_NORMAL,
-    _ctx->createProgramFromPTXFile("ptx/scatter_nodirect.cu.ptx", "radiance")
+    RAY_TYPE_NO_NEXT_EVENT_ESTIMATION,
+    _ctx->createProgramFromPTXFile("ptx/hit_nodirect.cu.ptx", "radiance")
   );
   _material->setClosestHitProgram(
     RAY_TYPE_NEXT_EVENT_ESTIMATION,
-    _ctx->createProgramFromPTXFile("ptx/scatter_direct.cu.ptx", "radiance")
+    _ctx->createProgramFromPTXFile("ptx/hit_direct.cu.ptx", "radiance")
+  );
+  _material->setClosestHitProgram(
+    RAY_TYPE_SHADOW,
+    _ctx->createProgramFromPTXFile("ptx/hit_shadow.cu.ptx", "radiance")
   );
   _material["evalBSDFLocal"]->set(
     _ctx->createProgramFromPTXFile(getPtxFile(), getEvalBSDFLocalProgram())

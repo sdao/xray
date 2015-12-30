@@ -8,11 +8,15 @@
 
 using namespace optix;
 
+/* For sphere programs. */
 rtDeclareVariable(float3, origin, , );
 rtDeclareVariable(float, radius, , );
 rtDeclareVariable(int, invertMode, , );
+
+/* For intersection/bounds programs. */
 rtDeclareVariable(int, id, , );
 
+/* OptiX data for intersection programs. */
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
 rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
 rtDeclareVariable(int, isectHitId, attribute isectHitId, );

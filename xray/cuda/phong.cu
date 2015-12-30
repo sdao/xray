@@ -1,13 +1,23 @@
+/**
+ * This is a Phong (simulated glossy reflection) material. It is wrapped by the
+ * Phong class.
+ */
+
 #include <optix.h>
 #include <optix_cuda.h>
 #include <optix_world.h>
 #include "core.cuh"
 #include "math.cuh"
 
+/** Cached scaling term in the Phong BSDF. */
 rtDeclareVariable(float3, scaleBRDF, , );
+/** Cached scaling term in the Phong PDF. */
 rtDeclareVariable(float, scaleProb, , );
+/** The Phong exponent of the material. */
 rtDeclareVariable(float, exponent, , );
+/** 1.0/exponent. */
 rtDeclareVariable(float, invExponent, , );
+/** The color reflected by the Phong material; similar to Lambert albedo. */
 rtDeclareVariable(float3, color, , );
 
 RT_CALLABLE_PROGRAM __inline__ float3 evalBSDFInternal(

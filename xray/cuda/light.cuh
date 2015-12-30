@@ -9,7 +9,6 @@
 #endif
 
 #ifdef __CUDACC__
-rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 rtDeclareVariable(rtObject, sceneRoot, , );
 
 __device__ void evalWorld(
@@ -30,11 +29,17 @@ __device__ void sampleWorld(
 );
 #endif
 
+/**
+ * A light instance as represented on the device.
+ * Light instances should be created on the host and sent to the device.
+ * They cannot be constructed on the device, and in turn, their emission
+ * and sampling functions cannot be called on the host.
+ */
 struct Light {
-  optix::float3 color;
-  optix::float3 boundsOrigin;
-  float boundsRadius;
-  int id;
+  optix::float3 color;        /**< The color emitted by the light. */
+  optix::float3 boundsOrigin; /**< The origin of the light's bounding sphere. */
+  float boundsRadius;         /**< The radius of the light's bounding sphere. */
+  int id;                     /**< Each light instance needs a unique ID. */
 
   __host__ static Light* make(optix::float3 c) {
     Light* l = new Light();
@@ -174,11 +179,11 @@ struct Light {
     optix::Ray pointToLight = optix::make_Ray(
       point + dirToLight * XRAY_VERY_SMALL,
       dirToLight,
-      ray.ray_type,
+      RAY_TYPE_SHADOW,
       XRAY_VERY_SMALL,
       RT_DEFAULT_MAX
     );
-    NormalRayData checkData = NormalRayData::makeShadow(point, dirToLight);
+    ShadowRayData checkData = ShadowRayData::make();
     rtTrace(sceneRoot, pointToLight, checkData);
     int idMatch = checkData.lastHitId == id;
     optix::float3 emittedColor =
@@ -224,11 +229,11 @@ struct Light {
     optix::Ray pointToLight = optix::make_Ray(
       point + dirToLight * XRAY_VERY_SMALL,
       dirToLight,
-      ray.ray_type,
+      RAY_TYPE_SHADOW,
       XRAY_VERY_SMALL,
       RT_DEFAULT_MAX
     );
-    NormalRayData checkData = NormalRayData::makeShadow(point, dirToLight);
+    ShadowRayData checkData = ShadowRayData::make();
     rtTrace(sceneRoot, pointToLight, checkData);
     int idMatch = checkData.lastHitId == id;
     optix::float3 emittedColor =

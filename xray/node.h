@@ -62,8 +62,8 @@ public:
   const AreaLight* getLight(std::string key) const;
   /** Gets the material pointer referenced by the given key. */
   const Material* getMaterial(std::string key) const;
-  /** Gets the geom instance pointer referenced by the given key. */
-  const Instance* getGeomInstance(std::string key) const;
+  /** Gets the instance pointer referenced by the given key. */
+  const Instance* getInstance(std::string key) const;
   /** Gets the instance pointers referenced in the list with the given key. */
-  std::vector<const Instance*> getGeomInstanceList(std::string key) const;
+  std::vector<const Instance*> getInstanceList(std::string key) const;
 };

@@ -25,7 +25,7 @@ Scene::Scene(std::string jsonFile)
     
     readLights(pt);
     readMats(pt);
-    readGeomInstances(pt);
+    readInstances(pt);
     readCameras(pt);
   } catch (...) {
     cleanUp();
@@ -43,6 +43,10 @@ void Scene::cleanUp() {
   }
 
   for (auto& pair : instances) {
+    delete pair.second;
+  }
+
+  for (auto& pair : lights) {
     delete pair.second;
   }
 
@@ -127,7 +131,7 @@ void Scene::readMats(const ptree& root) {
   readMultiple<const Material*>(root, "materials", lookup, materials);
 }
 
-void Scene::readGeomInstances(const ptree& root) {
+void Scene::readInstances(const ptree& root) {
   static auto lookup = [](
     Xray* xray,
     const Node& n,
@@ -145,7 +149,7 @@ void Scene::readGeomInstances(const ptree& root) {
     }
     const Instance* instance =
       Instance::make(xray, g, n.getMaterial("mat"), n.getLight("light"));
-    delete g;
+    delete g; // We don't store g because we don't have true instances.
     return instance;
   };
 

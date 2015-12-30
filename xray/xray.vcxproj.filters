@@ -25,10 +25,13 @@
     <CudaCompile Include="cuda\sphere.cu">
       <Filter>cuda\geoms</Filter>
     </CudaCompile>
-    <CudaCompile Include="cuda\scatter_direct.cu">
+    <CudaCompile Include="cuda\hit_direct.cu">
       <Filter>cuda\materials</Filter>
     </CudaCompile>
-    <CudaCompile Include="cuda\scatter_nodirect.cu">
+    <CudaCompile Include="cuda\hit_nodirect.cu">
+      <Filter>cuda\materials</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cuda\hit_shadow.cu">
       <Filter>cuda\materials</Filter>
     </CudaCompile>
   </ItemGroup>
@@ -150,7 +153,9 @@
     <ClInclude Include="tinyexr\tinyexr.h">
       <Filter>tinyexr</Filter>
     </ClInclude>
-    <ClInclude Include="util.h" />
+    <ClInclude Include="util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

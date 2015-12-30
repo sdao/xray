@@ -1,13 +1,25 @@
+/**
+ * This is a material that always returns a black color. It is attached on
+ * instances that have no other materials (e.g. pure lights) and wrapped by
+ * the NoReflect class.
+ */
+
 #include <optix.h>
 #include <optix_cuda.h>
 #include <optix_world.h>
 #include "core.cuh"
 
-RT_CALLABLE_PROGRAM float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float3 evalBSDFLocal(
+  const float3& incoming,
+  const float3& outgoing
+) {
   return make_float3(0);
 }
 
-RT_CALLABLE_PROGRAM float evalPDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float evalPDFLocal(
+  const float3& incoming,
+  const float3& outgoing
+) {
   return 0.0f;
 }
 

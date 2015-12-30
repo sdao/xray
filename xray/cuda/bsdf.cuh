@@ -8,14 +8,21 @@
 
 using namespace optix;
 
+/* OptiX data for closest-hit programs. */
 rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
 rtDeclareVariable(float, isectDist, rtIntersectionDistance, );
 rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
 rtDeclareVariable(int, isectHitId, attribute isectHitId, );
-rtDeclareVariable(Light, light, , ); 
+
+/* Attached to context. */
 rtDeclareVariable(unsigned int, numLights, , ); 
-rtDeclareVariable(int, materialFlags, , );
 rtBuffer<Light, 1> lightsBuffer;
+
+/* Attached to geometry instance. */
+rtDeclareVariable(Light, light, , ); 
+
+/* For material programs. */
+rtDeclareVariable(int, materialFlags, , );
 
 /**
  * Evaluates the BSDF of an incoming and outgoing ray direction in the local
@@ -234,12 +241,6 @@ __device__ __inline__ void scatter(
 }
 
 RT_PROGRAM void radiance() {
-  if (normalRayData.flags & RAY_SKIP_MATERIAL_COMPUTATION) {
-    normalRayData.hitNormal = isectNormal;
-    normalRayData.lastHitId = isectHitId;
-    return;
-  }
-
   if (math::isNaN(isectNormal)) {
     normalRayData.flags |= RAY_DEAD;
     return;
@@ -248,24 +249,17 @@ RT_PROGRAM void radiance() {
   float3 isectNormalObj = rtTransformNormal(RT_OBJECT_TO_WORLD, isectNormal); 
   float3 isectPos = normalRayData.origin + normalRayData.direction * isectDist;
 
-  // Regular illumination on light at current step.
 #if ENABLE_DIRECT_ILLUMINATION
+  // Regular illumination on light at current step if previous point was
+  // not a direct illumination step.
   int lume = !(normalRayData.flags & RAY_DID_DIRECT_ILLUMINATE)
     & (light.id != -1);
 
   normalRayData.radiance += lume
     * normalRayData.beta
     * light.emit(normalRayData.direction, isectNormalObj);
-#else
-  int lume = (light.id != -1);
 
-  normalRayData.radiance += lume
-    * normalRayData.beta
-    * light.emit(normalRayData.direction, isectNormalObj);
-#endif
-  
-  // Next event estimation with light at next step.
-#if ENABLE_DIRECT_ILLUMINATION
+  // Next event estimation with the light at the next step.
   if (materialFlags & MATERIAL_DIRECT_ILLUMINATE) {
     normalRayData.radiance += normalRayData.beta
       * uniformSampleOneLight(normalRayData, isectNormalObj, isectPos);
@@ -273,6 +267,13 @@ RT_PROGRAM void radiance() {
   } else {
     normalRayData.flags &= ~RAY_DID_DIRECT_ILLUMINATE;
   }
+#else
+  // Regular illumination on light at current step.
+  int lume = (light.id != -1);
+
+  normalRayData.radiance += lume
+    * normalRayData.beta
+    * light.emit(normalRayData.direction, isectNormalObj);
 #endif
 
   // Material evaluation at current step.

@@ -53,8 +53,8 @@ class Scene {
   void readLights(const boost::property_tree::ptree& root);
   /** Reads all of the materials in the given property tree. */
   void readMats(const boost::property_tree::ptree& root);
-  /** Reads all of the geometry in the given property tree. */
-  void readGeomInstances(const boost::property_tree::ptree& root);
+  /** Reads all of the instances in the given property tree. */
+  void readInstances(const boost::property_tree::ptree& root);
   /** Reads all of the cameras in the given property tree. */
   void readCameras(const boost::property_tree::ptree& root);
   

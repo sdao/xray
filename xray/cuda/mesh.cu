@@ -6,13 +6,16 @@
 
 using namespace optix;
 
-rtDeclareVariable(int, id, , );
+/* For mesh programs. */
 rtBuffer<float3> vertexBuffer;     
 rtBuffer<float3> normalBuffer;
-rtBuffer<int3> faceIndices; // Index into vertex/normalBuffer for each face.
+rtBuffer<int3> faceIndices;
 
+/* For intersection/bounds programs. */
+rtDeclareVariable(int, id, , );
+
+/* OptiX data for intersection programs. */
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
-
 rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
 rtDeclareVariable(int, isectHitId, attribute isectHitId, );
 

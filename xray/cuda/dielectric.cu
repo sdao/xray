@@ -1,21 +1,36 @@
+/**
+ * This is a dielectric (glass/metal-like) refractive material. It is
+ * wrapped by the Dielectric class.
+ */
+
 #include <optix.h>
 #include <optix_cuda.h>
 #include <optix_world.h>
 #include "core.cuh"
 #include "math.cuh"
 
-rtDeclareVariable(float, r0, , ); /**< The cached R(0) value for Schlick's approximation. */
-rtDeclareVariable(float, etaEntering, , ); /**< The refraction ratio nVac / nMaterial. */
-rtDeclareVariable(float, etaExiting, , ); /**< Inverse of etaEntering (nMaterial / nVac). */
+/** The cached R(0) value for Schlick's approximation. */
+rtDeclareVariable(float, r0, , );
+/** The refraction ratio nVac / nMaterial. */
+rtDeclareVariable(float, etaEntering, , );
+/** Inverse of etaEntering: (nMaterial / nVac). */
+rtDeclareVariable(float, etaExiting, , );
+/** Color passed reflected or refracted by the material. */
 rtDeclareVariable(float3, color, , );
 
-RT_CALLABLE_PROGRAM float3 evalBSDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float3 evalBSDFLocal(
+  const float3& incoming,
+  const float3& outgoing
+) {
   // Probabilistically, we are never going to get the exact matching
   // incoming and outgoing vectors.
   return make_float3(0);
 }
 
-RT_CALLABLE_PROGRAM float evalPDFLocal(const float3& incoming, const float3& outgoing) {
+RT_CALLABLE_PROGRAM float evalPDFLocal(
+  const float3& incoming,
+  const float3& outgoing
+) {
   return 0.0f;
 }
 

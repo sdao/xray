@@ -263,13 +263,13 @@ if not exist "$(ProjectDir)ptx" mkdir "$(ProjectDir)ptx"</Command>
       </MaxRegCount>
       <HostDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</HostDebugInfo>
     </CudaCompile>
-    <CudaCompile Include="cuda\scatter_direct.cu">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/scatter_direct.cu" -ptx -o "ptx/scatter_direct.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling scatter_direct.cu into scatter_direct.cu.ptx...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">scatter_direct.cu.ptx</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling scatter_direct.cu into scatter_direct.cu.ptx...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">scatter_direct.cu.ptx</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/scatter_direct.cu" -ptx -o "ptx/scatter_direct.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
+    <CudaCompile Include="cuda\hit_direct.cu">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/hit_direct.cu" -ptx -o "ptx/hit_direct.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling hit_direct.cu into hit_direct.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">hit_direct.cu.ptx</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling hit_direct.cu into hit_direct.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">hit_direct.cu.ptx</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/hit_direct.cu" -ptx -o "ptx/hit_direct.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
       <CompileOut Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)ptx\%(Filename)%(Extension).ptx</CompileOut>
       <Include Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </Include>
@@ -280,13 +280,30 @@ if not exist "$(ProjectDir)ptx" mkdir "$(ProjectDir)ptx"</Command>
       </MaxRegCount>
       <HostDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</HostDebugInfo>
     </CudaCompile>
-    <CudaCompile Include="cuda\scatter_nodirect.cu">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/scatter_nodirect.cu" -ptx -o "ptx/scatter_nodirect.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling scatter_nodirect.cu into scatter_nodirect.cu.ptx...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">scatter_nodirect.cu.ptx</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling scatter_nodirect.cu into scatter_nodirect.cu.ptx...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">scatter_nodirect.cu.ptx</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/scatter_nodirect.cu" -ptx -o "ptx/scatter_nodirect.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
+    <CudaCompile Include="cuda\hit_nodirect.cu">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/hit_nodirect.cu" -ptx -o "ptx/hit_nodirect.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling hit_nodirect.cu into hit_nodirect.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">hit_nodirect.cu.ptx</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling hit_nodirect.cu into hit_nodirect.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">hit_nodirect.cu.ptx</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/hit_nodirect.cu" -ptx -o "ptx/hit_nodirect.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
+      <CompileOut Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)ptx\%(Filename)%(Extension).ptx</CompileOut>
+      <Include Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Include>
+      <CodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </CodeGeneration>
+      <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</GPUDebugInfo>
+      <MaxRegCount Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </MaxRegCount>
+      <HostDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</HostDebugInfo>
+    </CudaCompile>
+    <CudaCompile Include="cuda\hit_shadow.cu">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/hit_shadow.cu" -ptx -o "ptx/hit_shadow.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling hit_shadow.cu into hit_shadow.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">hit_shadow.cu.ptx</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling hit_shadow.cu into hit_shadow.cu.ptx...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">hit_shadow.cu.ptx</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/hit_shadow.cu" -ptx -o "ptx/hit_shadow.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
       <CompileOut Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)ptx\%(Filename)%(Extension).ptx</CompileOut>
       <Include Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </Include>

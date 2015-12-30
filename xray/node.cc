@@ -107,7 +107,7 @@ const Material* Node::getMaterial(std::string key) const {
   return *result;
 }
 
-const Instance* Node::getGeomInstance(std::string key) const {
+const Instance* Node::getInstance(std::string key) const {
   const Node::NodeLookupTranslator<const Instance*> t(container.instances);
   auto result = attributes.get_optional<
     const Instance*,
@@ -117,14 +117,14 @@ const Instance* Node::getGeomInstance(std::string key) const {
   if (!result) {
     const std::string itemName = attributes.get<std::string>(key);
     const std::string msg =
-      "Cannot resolve geometry reference '%1%' in property '%2%'";
+      "Cannot resolve instance reference '%1%' in property '%2%'";
     throw std::runtime_error(str(format(msg) % itemName % key));
   }
 
   return *result;
 }
 
-std::vector<const Instance*> Node::getGeomInstanceList(std::string key) const {
+std::vector<const Instance*> Node::getInstanceList(std::string key) const {
   const Node::NodeLookupTranslator<
     const Instance*,
     false
@@ -142,7 +142,7 @@ std::vector<const Instance*> Node::getGeomInstanceList(std::string key) const {
     if (!item) {
       const std::string itemName = listItem.second.get_value<std::string>();
       const std::string msg =
-        "Cannot resolve geometry reference '%1%' in list '%2%'";
+        "Cannot resolve instance reference '%1%' in list '%2%'";
       throw std::runtime_error(str(format(msg) % itemName % key));
     }
 

@@ -7,7 +7,9 @@ Xray::Xray() : _nextID(0) {
   _ctx->setEntryPointCount(CameraMode::CAMERA_MODE_COUNT);
 }
 
-Xray::~Xray() {}
+Xray::~Xray() {
+  _ctx->destroy();
+}
 
 optix::Context Xray::getContext() const {
   return _ctx;

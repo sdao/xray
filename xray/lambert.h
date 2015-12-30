@@ -5,6 +5,7 @@
 #include "node.h"
 #include "xray.h"
 
+/** A Lambert (perfectly diffuse) material. */
 class Lambert : public Material {
   optix::float3 _albedo;
 

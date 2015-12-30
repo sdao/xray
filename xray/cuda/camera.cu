@@ -13,14 +13,19 @@ enum Sample {
 
 using namespace optix;
 
+/* For camera program. */
 rtDeclareVariable(Matrix4x4, xform, , );
-rtDeclareVariable(float3, focalPlaneOrigin, , ); // The lower-left corner of the focal rectangle in camera space.
-rtDeclareVariable(float, focalPlaneRight, , ); // The vector pointing from the upper-left corner to the upper-right corner of the focal rectangle in camera space.
-rtDeclareVariable(float, focalPlaneUp, , );
+rtDeclareVariable(float3, focalPlaneOrigin, , );
+rtDeclareVariable(float2, focalPlaneSize, , );
 rtDeclareVariable(float, lensRadius, , );
+
+/* For commit program. */
 rtDeclareVariable(float, commitWeight, , );
+
+/* For miss program. */
 rtDeclareVariable(float3, backgroundColor, , );
 
+/* Attached to context. */
 rtDeclareVariable(rtObject, sceneRoot, , );
 rtBuffer<float3, 3> rawBuffer;
 rtBuffer<float4, 2> accumBuffer;
@@ -68,7 +73,8 @@ __device__ __inline__ void camera(int rayType) {
   float fracX = posX / float(launchDim.x - 1);
   float fracY = posY / float(launchDim.y - 1);
 
-  float3 offset = make_float3(focalPlaneRight * fracX, focalPlaneUp * fracY, 0);
+  float3 offset =
+    make_float3(focalPlaneSize.x * fracX, focalPlaneSize.y * fracY, 0);
   float3 lookAt = focalPlaneOrigin + offset;
 
   float3 eye = make_float3(0, 0, 0);
@@ -133,7 +139,7 @@ __device__ __inline__ void camera(int rayType) {
 }
 
 RT_PROGRAM void camera_nodirect() {
-  camera(RAY_TYPE_NORMAL);
+  camera(RAY_TYPE_NO_NEXT_EVENT_ESTIMATION);
 }
 
 RT_PROGRAM void camera_direct() {

@@ -37,7 +37,9 @@ Instance::Instance(
     _instance["light"]->setUserData(sizeof(Light), _light);
 }
 
-Instance::~Instance() {}
+Instance::~Instance() {
+  delete _light;
+}
 
 Instance* Instance::make(Xray* xray, const Geom* g, const Material* m, const AreaLight* l) {
   return new Instance(xray, g, m, l, xray->getNextID());
