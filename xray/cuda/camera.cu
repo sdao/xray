@@ -32,7 +32,7 @@ rtBuffer<float4, 2> accumBuffer;
 rtBuffer<uchar4, 2> imageBuffer;
 rtBuffer<unsigned int, 2> randBuffer;
 
-rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
+rtDeclareVariable(RayData, rayData, rtPayload, );
 
 rtDeclareVariable(uint2, launchIndex, rtLaunchIndex, );
 rtDeclareVariable(uint2, launchDim, rtLaunchDim, );
@@ -85,7 +85,7 @@ __device__ __inline__ void camera(int rayType) {
   float3 lookAtWorld = math::pointXform(lookAt, xform);
   float3 dir = normalize(lookAtWorld - eyeWorld);
 
-  NormalRayData data = NormalRayData::make(eyeWorld, dir, &rngState);
+  RayData data = RayData::makeTrace(eyeWorld, dir, &rngState);
   for (int depth = 0; ; ++depth) {
     optix::Ray ray = make_Ray(
       data.origin,
@@ -188,6 +188,6 @@ RT_PROGRAM void init() {
 }
 
 RT_PROGRAM void miss() {
-  normalRayData.radiance += backgroundColor * normalRayData.beta;
-  normalRayData.beta = make_float3(0);
+  rayData.radiance += backgroundColor * rayData.beta;
+  rayData.beta = make_float3(0);
 }

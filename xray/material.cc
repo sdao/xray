@@ -35,10 +35,6 @@ void Material::freeze() {
     RAY_TYPE_NEXT_EVENT_ESTIMATION,
     _ctx->createProgramFromPTXFile("ptx/hit_direct.cu.ptx", "radiance")
   );
-  _material->setClosestHitProgram(
-    RAY_TYPE_SHADOW,
-    _ctx->createProgramFromPTXFile("ptx/hit_shadow.cu.ptx", "radiance")
-  );
   _material["evalBSDFLocal"]->set(
     _ctx->createProgramFromPTXFile(getPtxFile(), getEvalBSDFLocalProgram())
   );

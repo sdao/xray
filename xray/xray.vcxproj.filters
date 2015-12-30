@@ -31,9 +31,6 @@
     <CudaCompile Include="cuda\hit_nodirect.cu">
       <Filter>cuda\materials</Filter>
     </CudaCompile>
-    <CudaCompile Include="cuda\hit_shadow.cu">
-      <Filter>cuda\materials</Filter>
-    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sphere.cc" />

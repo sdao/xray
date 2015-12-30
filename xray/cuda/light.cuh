@@ -71,7 +71,7 @@ struct Light {
   }
 
   __device__ optix::float3 directIlluminateByLightPDF(
-    const NormalRayData& data,
+    const RayData& data,
     const optix::float3& isectNormalObj,
     const optix::float3& isectPos
   ) const {
@@ -111,7 +111,7 @@ struct Light {
   }
 
   __device__ optix::float3 directIlluminateByMatPDF(
-    const NormalRayData& data,
+    const RayData& data,
     const optix::float3& isectNormalObj,
     const optix::float3& isectPos
   ) const {
@@ -179,11 +179,15 @@ struct Light {
     optix::Ray pointToLight = optix::make_Ray(
       point + dirToLight * XRAY_VERY_SMALL,
       dirToLight,
-      RAY_TYPE_SHADOW,
+#if ENABLE_DIRECT_ILLUMINATION
+      RAY_TYPE_NEXT_EVENT_ESTIMATION,
+#else
+      RAY_TYPE_NO_NEXT_EVENT_ESTIMATION,
+#endif
       XRAY_VERY_SMALL,
       RT_DEFAULT_MAX
     );
-    ShadowRayData checkData = ShadowRayData::make();
+    RayData checkData = RayData::makeShadow();
     rtTrace(sceneRoot, pointToLight, checkData);
     int idMatch = checkData.lastHitId == id;
     optix::float3 emittedColor =
@@ -229,11 +233,15 @@ struct Light {
     optix::Ray pointToLight = optix::make_Ray(
       point + dirToLight * XRAY_VERY_SMALL,
       dirToLight,
-      RAY_TYPE_SHADOW,
+#if ENABLE_DIRECT_ILLUMINATION
+      RAY_TYPE_NEXT_EVENT_ESTIMATION,
+#else
+      RAY_TYPE_NO_NEXT_EVENT_ESTIMATION,
+#endif
       XRAY_VERY_SMALL,
       RT_DEFAULT_MAX
     );
-    ShadowRayData checkData = ShadowRayData::make();
+    RayData checkData = RayData::makeShadow();
     rtTrace(sceneRoot, pointToLight, checkData);
     int idMatch = checkData.lastHitId == id;
     optix::float3 emittedColor =
@@ -245,7 +253,7 @@ struct Light {
   }
 
   __device__ optix::float3 directIlluminate(
-    const NormalRayData& data,
+    const RayData& data,
     const optix::float3& isectNormalObj,
     const optix::float3& isectPos
   ) const {

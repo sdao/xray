@@ -297,23 +297,6 @@ if not exist "$(ProjectDir)ptx" mkdir "$(ProjectDir)ptx"</Command>
       </MaxRegCount>
       <HostDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</HostDebugInfo>
     </CudaCompile>
-    <CudaCompile Include="cuda\hit_shadow.cu">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/hit_shadow.cu" -ptx -o "ptx/hit_shadow.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling hit_shadow.cu into hit_shadow.cu.ptx...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">hit_shadow.cu.ptx</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling hit_shadow.cu into hit_shadow.cu.ptx...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">hit_shadow.cu.ptx</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/hit_shadow.cu" -ptx -o "ptx/hit_shadow.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
-      <CompileOut Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)ptx\%(Filename)%(Extension).ptx</CompileOut>
-      <Include Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Include>
-      <CodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </CodeGeneration>
-      <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</GPUDebugInfo>
-      <MaxRegCount Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </MaxRegCount>
-      <HostDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</HostDebugInfo>
-    </CudaCompile>
     <CudaCompile Include="cuda\sphere.cu">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.5/bin/nvcc.exe" "cuda/sphere.cu" -ptx -o "ptx/sphere.cu.ptx" -ccbin "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin" -m64 -D_USE_MATH_DEFINES -DNOMINMAX -DCUDA_64_BIT_DEVICE_CODE --use_fast_math --compiler-options /D_USE_MATH_DEFINES -DNVCC -I"C:/ProgramData/NVIDIA Corporation/OptiX SDK 3.9.0/include"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling sphere.cu into sphere.cu.ptx...</Message>

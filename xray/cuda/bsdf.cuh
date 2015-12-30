@@ -9,7 +9,7 @@
 using namespace optix;
 
 /* OptiX data for closest-hit programs. */
-rtDeclareVariable(NormalRayData, normalRayData, rtPayload, );
+rtDeclareVariable(RayData, rayData, rtPayload, );
 rtDeclareVariable(float, isectDist, rtIntersectionDistance, );
 rtDeclareVariable(float3, isectNormal, attribute isectNormal, );
 rtDeclareVariable(int, isectHitId, attribute isectHitId, );
@@ -184,7 +184,7 @@ __device__ __inline__ void evalWorld(
  * @param isectPos       the position of the intersection, in scene-world space
  */
 __device__ __inline__ optix::float3 uniformSampleOneLight(
-  const NormalRayData& data,
+  const RayData& data,
   const optix::float3& isectNormalObj,
   const optix::float3& isectPos
 ) {
@@ -215,7 +215,7 @@ __device__ __inline__ optix::float3 uniformSampleOneLight(
   *                                scene-world space
   */
 __device__ __inline__ void scatter(
-  NormalRayData& rayData,
+  RayData& rayData,
   float3 isectNormalObj,
   float3 pos
 ) {
@@ -241,45 +241,53 @@ __device__ __inline__ void scatter(
 }
 
 RT_PROGRAM void radiance() {
-  if (math::isNaN(isectNormal)) {
-    normalRayData.flags |= RAY_DEAD;
+  float3 isectNormalObj = rtTransformNormal(RT_OBJECT_TO_WORLD, isectNormal); 
+
+  if (math::isNaN(isectNormalObj)) {
+    rayData.flags |= RAY_DEAD;
     return;
   }
 
-  float3 isectNormalObj = rtTransformNormal(RT_OBJECT_TO_WORLD, isectNormal); 
-  float3 isectPos = normalRayData.origin + normalRayData.direction * isectDist;
+  if (rayData.flags & RAY_SHADOW) {
+    rayData.hitNormal = isectNormalObj;
+    rayData.lastHitId = isectHitId;
+    rayData.flags |= RAY_DEAD;
+    return;
+  }
+
+  float3 isectPos = rayData.origin + rayData.direction * isectDist;
 
 #if ENABLE_DIRECT_ILLUMINATION
   // Regular illumination on light at current step if previous point was
   // not a direct illumination step.
-  int lume = !(normalRayData.flags & RAY_DID_DIRECT_ILLUMINATE)
+  int lume = !(rayData.flags & RAY_DID_DIRECT_ILLUMINATE)
     & (light.id != -1);
 
-  normalRayData.radiance += lume
-    * normalRayData.beta
-    * light.emit(normalRayData.direction, isectNormalObj);
+  rayData.radiance += lume
+    * rayData.beta
+    * light.emit(rayData.direction, isectNormalObj);
 
   // Next event estimation with the light at the next step.
   if (materialFlags & MATERIAL_DIRECT_ILLUMINATE) {
-    normalRayData.radiance += normalRayData.beta
-      * uniformSampleOneLight(normalRayData, isectNormalObj, isectPos);
-    normalRayData.flags |= RAY_DID_DIRECT_ILLUMINATE;
+    rayData.radiance += rayData.beta
+      * uniformSampleOneLight(rayData, isectNormalObj, isectPos);
+    rayData.flags |= RAY_DID_DIRECT_ILLUMINATE;
   } else {
-    normalRayData.flags &= ~RAY_DID_DIRECT_ILLUMINATE;
+    rayData.flags &= ~RAY_DID_DIRECT_ILLUMINATE;
   }
 #else
   // Regular illumination on light at current step.
   int lume = (light.id != -1);
 
-  normalRayData.radiance += lume
-    * normalRayData.beta
-    * light.emit(normalRayData.direction, isectNormalObj);
+  rayData.radiance += lume
+    * rayData.beta
+    * light.emit(rayData.direction, isectNormalObj);
 #endif
 
   // Material evaluation at current step.
   if (materialFlags & MATERIAL_REFLECT) {
-    scatter(normalRayData, isectNormalObj, isectPos);
+    scatter(rayData, isectNormalObj, isectPos);
   } else {
-    normalRayData.flags |= RAY_DEAD;
+    rayData.flags |= RAY_DEAD;
   }
 }
