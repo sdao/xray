@@ -81,7 +81,13 @@ __device__ __inline__ void camera(int rayType) {
 
   NormalRayData data = NormalRayData::make(eyeWorld, dir, &rngState);
   for (int depth = 0; ; ++depth) {
-    optix::Ray ray = make_Ray(data.origin, data.direction, rayType, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
+    optix::Ray ray = make_Ray(
+      data.origin,
+      data.direction,
+      rayType,
+      XRAY_VERY_SMALL,
+      RT_DEFAULT_MAX
+    );
     rtTrace(sceneRoot, ray, data);
 
     // End path if the beta is black, since no point in continuing.
@@ -119,8 +125,10 @@ __device__ __inline__ void camera(int rayType) {
     math::clamp(data.radiance.z, 0.0f, BIASED_RADIANCE_CLAMPING)
   );
 
-  rawBuffer[make_uint3(SAMPLE_RADIANCE, launchIndex.x, launchIndex.y)] = data.radiance;
-  rawBuffer[make_uint3(SAMPLE_POSITION, launchIndex.x, launchIndex.y)] = make_float3(posX, posY, 0);
+  rawBuffer[make_uint3(SAMPLE_RADIANCE, launchIndex.x, launchIndex.y)] =
+    data.radiance;
+  rawBuffer[make_uint3(SAMPLE_POSITION, launchIndex.x, launchIndex.y)] =
+    make_float3(posX, posY, 0);
   randBuffer[launchIndex] = curand(&rngState);
 }
 
@@ -135,11 +143,12 @@ RT_PROGRAM void camera_direct() {
 RT_PROGRAM void commit() {
   float posX = launchIndex.x;
   float posY = launchIndex.y;
-
-  int minX = clamp(int(ceilf(posX - FILTER_WIDTH - XRAY_VERY_SMALL)), 0, int(launchDim.x - 1));
-  int maxX = clamp(int(floorf(posX + FILTER_WIDTH + XRAY_VERY_SMALL)), 0, int(launchDim.x - 1));
-  int minY = clamp(int(ceilf(posY - FILTER_WIDTH - XRAY_VERY_SMALL)), 0, int(launchDim.y - 1));
-  int maxY = clamp(int(floorf(posY + FILTER_WIDTH + XRAY_VERY_SMALL)), 0, int(launchDim.y - 1));
+  
+  const float widthTweak = FILTER_WIDTH + XRAY_VERY_SMALL;
+  int minX = clamp(int(ceilf(posX - widthTweak)), 0, int(launchDim.x - 1));
+  int maxX = clamp(int(floorf(posX + widthTweak)), 0, int(launchDim.x - 1));
+  int minY = clamp(int(ceilf(posY - widthTweak)), 0, int(launchDim.y - 1));
+  int maxY = clamp(int(floorf(posY + widthTweak)), 0, int(launchDim.y - 1));
   
   float4 currentAccum = accumBuffer[launchIndex];
 
@@ -163,7 +172,8 @@ RT_PROGRAM void commit() {
 
   accumBuffer[launchIndex] = currentAccum;
 
-  float3 color = make_float3(currentAccum.x, currentAccum.y, currentAccum.z) / currentAccum.w;
+  float3 color = make_float3(currentAccum.x, currentAccum.y, currentAccum.z)
+    / currentAccum.w;
   imageBuffer[launchIndex] = math::colorToBgra(color);
 }
 

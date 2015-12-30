@@ -150,6 +150,7 @@
     <ClInclude Include="tinyexr\tinyexr.h">
       <Filter>tinyexr</Filter>
     </ClInclude>
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

@@ -1,6 +1,5 @@
 #pragma once
 #define NOMINMAX
-#include "xray.h"
 #include "node.h"
 #include "cuda/light.cuh"
 
@@ -8,10 +7,10 @@ class AreaLight {
   optix::float3 _color;
 
 public:
-  AreaLight(Xray* xray, optix::float3 color);
+  AreaLight(optix::float3 color);
   ~AreaLight();
   
-  static AreaLight* make(Xray* xray, const Node& n);
+  static AreaLight* make(const Node& n);
   Light* getLight() const;
 };
 

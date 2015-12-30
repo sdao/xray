@@ -64,6 +64,6 @@ public:
   const Material* getMaterial(std::string key) const;
   /** Gets the geom instance pointer referenced by the given key. */
   const Instance* getGeomInstance(std::string key) const;
-  /** Gets the geom instance pointers referenced in the list with the given key. */
+  /** Gets the instance pointers referenced in the list with the given key. */
   std::vector<const Instance*> getGeomInstanceList(std::string key) const;
 };

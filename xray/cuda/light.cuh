@@ -9,6 +9,7 @@
 #endif
 
 #ifdef __CUDACC__
+rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 rtDeclareVariable(rtObject, sceneRoot, , );
 
 __device__ void evalWorld(
@@ -54,7 +55,10 @@ struct Light {
   }
   
 #ifdef __CUDACC__
-  __device__ optix::float3 emit(const optix::float3& dir, const optix::float3& n) const {
+  __device__ optix::float3 emit(
+    const optix::float3& dir,
+    const optix::float3& n
+  ) const {
     // Only emit on the normal-facing side of objects, e.g. on the outside of a
     // sphere or on the normal side of a disc.
     int outside = dot(dir, n) < -XRAY_EPSILON;
@@ -167,12 +171,18 @@ struct Light {
       pdf = math::uniformSampleConePDF(theta, dirToLightLocal);
     }
 
-    optix::Ray pointToLight = optix::make_Ray(point + dirToLight * XRAY_VERY_SMALL, dirToLight, RAY_TYPE_NORMAL, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
+    optix::Ray pointToLight = optix::make_Ray(
+      point + dirToLight * XRAY_VERY_SMALL,
+      dirToLight,
+      ray.ray_type,
+      XRAY_VERY_SMALL,
+      RT_DEFAULT_MAX
+    );
     NormalRayData checkData = NormalRayData::makeShadow(point, dirToLight);
-    checkData.flags |= RAY_SKIP_MATERIAL_COMPUTATION;
     rtTrace(sceneRoot, pointToLight, checkData);
     int idMatch = checkData.lastHitId == id;
-    optix::float3 emittedColor = idMatch * emit(dirToLight, checkData.hitNormal);
+    optix::float3 emittedColor =
+      idMatch * emit(dirToLight, checkData.hitNormal);
 
     *colorOut = emittedColor;
     *pdfOut = pdf;
@@ -211,12 +221,18 @@ struct Light {
       pdf = math::uniformSampleConePDF(theta);
     }
      
-    optix::Ray pointToLight = optix::make_Ray(point + dirToLight * XRAY_VERY_SMALL, dirToLight, RAY_TYPE_NORMAL, XRAY_VERY_SMALL, RT_DEFAULT_MAX);
+    optix::Ray pointToLight = optix::make_Ray(
+      point + dirToLight * XRAY_VERY_SMALL,
+      dirToLight,
+      ray.ray_type,
+      XRAY_VERY_SMALL,
+      RT_DEFAULT_MAX
+    );
     NormalRayData checkData = NormalRayData::makeShadow(point, dirToLight);
-    checkData.flags |= RAY_SKIP_MATERIAL_COMPUTATION;
     rtTrace(sceneRoot, pointToLight, checkData);
     int idMatch = checkData.lastHitId == id;
-    optix::float3 emittedColor = idMatch * emit(dirToLight, checkData.hitNormal);
+    optix::float3 emittedColor =
+      idMatch * emit(dirToLight, checkData.hitNormal);
 
     *dirToLightOut = dirToLight;
     *colorOut = emittedColor;

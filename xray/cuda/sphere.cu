@@ -20,7 +20,7 @@ rtDeclareVariable(int, isectHitId, attribute isectHitId, );
 RT_PROGRAM void sphereIntersect(int) {
   bool inverted = invertMode != 0;
 
-	float3 diff = ray.origin - origin;
+  float3 diff = ray.origin - origin;
   float3 l = ray.direction;
 
   // See Wikipedia:
@@ -64,6 +64,6 @@ RT_PROGRAM void sphereIntersect(int) {
 
 RT_PROGRAM void sphereBounds(int, float result[6]) {
   float3 boundsDiag = make_float3(radius);
-	Aabb* aabb = (Aabb*) result;
+  Aabb* aabb = (Aabb*) result;
   aabb->set(origin - boundsDiag, origin + boundsDiag);
 }

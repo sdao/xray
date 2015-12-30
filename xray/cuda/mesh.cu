@@ -36,7 +36,8 @@ RT_PROGRAM void meshIntersect(int primIdx)
       float3 n1 = normalBuffer[face.y];
       float3 n2 = normalBuffer[face.z];
       
-      isectNormal = normalize(n1 * beta + n2 * gamma + n0 * (1.0f - beta - gamma));
+      isectNormal =
+        normalize(n1 * beta + n2 * gamma + n0 * (1.0f - beta - gamma));
       isectHitId = id;
       rtReportIntersection(0);
     }

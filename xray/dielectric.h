@@ -21,7 +21,11 @@ protected:
   virtual bool shouldDirectIlluminate() const override;
 
 public:
-  Dielectric(Xray* xray, float ior = IOR_GLASS, optix::float3 c = optix::make_float3(1));
+  Dielectric(
+    Xray* xray,
+    float ior = IOR_GLASS,
+    optix::float3 c = optix::make_float3(1)
+  );
   static Dielectric* make(Xray* xray, const Node& n);
 };
 

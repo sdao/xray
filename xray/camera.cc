@@ -1,7 +1,7 @@
 #include "camera.h"
 #include "math.h"
 #include "light.h"
-#include <random>
+#include "util.h"
 
 Camera::Camera(
   Xray* xray,
@@ -35,21 +35,19 @@ Camera::Camera(
 
   _focalPlaneUp = -2.0f * halfFocalPlaneUp;
   _focalPlaneRight = 2.0f * halfFocalPlaneRight;
-  _focalPlaneOrigin = optix::make_float3(-halfFocalPlaneRight, halfFocalPlaneUp, -_focalLength);
+  _focalPlaneOrigin =
+    optix::make_float3(-halfFocalPlaneRight, halfFocalPlaneUp, -_focalLength);
   
   // Set up OptiX image buffers.
-  _raw = _ctx->createBuffer(RT_BUFFER_OUTPUT, RT_FORMAT_FLOAT3, 2, ww, hh);
-  _accum = _ctx->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, ww, hh);
-  _image = _ctx->createBuffer(RT_BUFFER_OUTPUT, RT_FORMAT_UNSIGNED_BYTE4, ww, hh);
-  _rng = _ctx->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_UNSIGNED_INT, ww, hh);
-
-  std::mt19937 rng(42);
-  std::uniform_int_distribution<unsigned> unsignedDist;
-  unsigned int* rngMapped = static_cast<unsigned int*>(_rng->map());
-  for (int i = 0; i < ww * hh; ++i) {
-    rngMapped[i] = unsignedDist(rng);
-  }
-  _rng->unmap();
+  _raw =
+    _ctx->createBuffer(RT_BUFFER_OUTPUT, RT_FORMAT_FLOAT3, 2, ww, hh);
+  _accum =
+    _ctx->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, ww, hh);
+  _image =
+    _ctx->createBuffer(RT_BUFFER_OUTPUT, RT_FORMAT_UNSIGNED_BYTE4, ww, hh);
+  _rng =
+    _ctx->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_UNSIGNED_INT, ww, hh);
+  util::withMappedBuffer<unsigned int>(_rng, util::fillRandom);
 
   // Set up OptiX ray and miss programs.
   _cam = _ctx->createProgramFromPTXFile("ptx/camera.cu.ptx", "camera_nodirect");
@@ -80,7 +78,11 @@ Camera::~Camera() {
 Camera* Camera::make(Xray* xray, const Node& n) {
   return new Camera(
     xray,
-    shared::rotationThenTranslation(n.getFloat("rotateAngle"), n.getFloat3("rotateAxis"), n.getFloat3("translate")),
+    shared::rotationThenTranslation(
+      n.getFloat("rotateAngle"),
+      n.getFloat3("rotateAxis"),
+      n.getFloat3("translate")
+    ),
     n.getGeomInstanceList("objects"),
     n.getInt("width"), n.getInt("height"),
     n.getFloat("fov"), n.getFloat("focalLength"),
@@ -135,22 +137,22 @@ void Camera::prepare() {
       lightPtrs.push_back(l);
     }
   }
+  _ctx["sceneRoot"]->set(group);
 
-  _lights = _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_USER, lightPtrs.size());
+  _lights =
+    _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_USER, lightPtrs.size());
   _lights->setElementSize(sizeof(Light));
-  Light* lightsMapped = static_cast<Light*>(_lights->map());
-  for (int i = 0; i < lightPtrs.size(); ++i) {
-    lightsMapped[i] = *lightPtrs[i];
-  }
-  _lights->unmap();
+  util::withMappedBuffer<Light>(_lights, [&](Light* buffer, size_t len) {
+    for (int i = 0; i < len; ++i) {
+      buffer[i] = *lightPtrs[i];
+    }
+  });
   _ctx["lightsBuffer"]->setBuffer(_lights);
   _ctx["numLights"]->setUint(unsigned(lightPtrs.size()));
 
   optix::Acceleration accel = _ctx->createAcceleration("Trbvh", "Bvh");
   group->setAcceleration(accel);
   accel->markDirty();
-
-  _ctx["sceneRoot"]->set(group);
 
   // Validate and compile.
   _ctx->validate();
@@ -163,9 +165,15 @@ void Camera::render(bool nextEventEstimation) {
     _needReset = false;
   }
 
+  if (nextEventEstimation) {
+    _ctx->launch(CAMERA_TRACE_NEXT_EVENT_ESTIMATION, _w, _h);
+  } else {
+    _ctx->launch(CAMERA_TRACE_NORMAL, _w, _h);
+  }
+
   _commit["commitWeight"]->setFloat(nextEventEstimation ? 1.0f : 0.25f);
-  _ctx->launch(nextEventEstimation ? CAMERA_TRACE_NEXT_EVENT_ESTIMATION : CAMERA_TRACE_NORMAL, _w, _h);
   _ctx->launch(CAMERA_COMMIT, _w, _h);
+
   _frame++;
 }
 

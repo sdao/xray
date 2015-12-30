@@ -3,7 +3,9 @@
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
 
-Mesh::Mesh(Xray* xray, optix::float3 origin, std::string name) : Geom(xray->getContext()), _origin(origin) {
+Mesh::Mesh(Xray* xray, optix::float3 origin, std::string name)
+  : Geom(xray->getContext()), _origin(origin)
+{
   readPolyModel(name);
 
   _geom["vertexBuffer"]->setBuffer(_vertices);
@@ -71,31 +73,52 @@ void Mesh::readPolyModel(std::string name) {
       throw std::runtime_error("No vertex normals on the mesh");
     }
 
-    // Add points.
-    _vertices = _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, mesh->mNumVertices);
-    _normals = _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, mesh->mNumVertices);
+    // Setup buffers.
+    _vertices = _ctx->createBuffer(
+      RT_BUFFER_INPUT,
+      RT_FORMAT_FLOAT3,
+      mesh->mNumVertices
+    );
+    _normals = _ctx->createBuffer(
+      RT_BUFFER_INPUT,
+      RT_FORMAT_FLOAT3,
+      mesh->mNumVertices
+    );
+    _faces = _ctx->createBuffer(
+      RT_BUFFER_INPUT,
+      RT_FORMAT_INT3,
+      mesh->mNumFaces
+    );
     optix::float3* vertexMap = static_cast<optix::float3*>(_vertices->map());
     optix::float3* normalMap = static_cast<optix::float3*>(_normals->map());
+    optix::int3* faceMap = static_cast<optix::int3*>(_faces->map());
+
+    // Add points.
     optix::Aabb b;
     for (size_t i = 0; i < mesh->mNumVertices; ++i) {
       aiVector3D thisPos = mesh->mVertices[i];
       aiVector3D thisNorm = mesh->mNormals[i];
 
-      vertexMap[i] = optix::make_float3(thisPos.x, thisPos.y, thisPos.z) + _origin;
-      normalMap[i] = optix::normalize(optix::make_float3(thisNorm.x, thisNorm.y, thisNorm.z));
+      vertexMap[i] =
+        optix::make_float3(thisPos.x, thisPos.y, thisPos.z) + _origin;
+      normalMap[i] = optix::normalize(
+        optix::make_float3(thisNorm.x, thisNorm.y, thisNorm.z)
+      );
       b.include(vertexMap[i]);
     }
 
     // Add faces.
     _numFaces = mesh->mNumFaces;
-    _faces = _ctx->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_INT3, mesh->mNumFaces);
-    optix::int3* faceMap = static_cast<optix::int3*>(_faces->map());
     for (size_t i = 0; i < mesh->mNumFaces; ++i) {
       aiFace face = mesh->mFaces[i];
 
       // Only add the triangles (we should have a triangulated mesh).
       if (face.mNumIndices == 3) {
-        faceMap[i] = optix::make_int3(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
+        faceMap[i] = optix::make_int3(
+          face.mIndices[0],
+          face.mIndices[1],
+          face.mIndices[2]
+        );
       } else {
         faceMap[i] = optix::make_int3(-1);
       }

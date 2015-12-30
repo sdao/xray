@@ -16,9 +16,18 @@ protected:
   virtual std::string getBoundsProgram() const override;
 
 public:
-  Disc(Xray* xray, optix::float3 origin, optix::float3 normal, float radiusOuter, float radiusInner);
+  Disc(
+    Xray* xray,
+    optix::float3 origin,
+    optix::float3 normal,
+    float radiusOuter,
+    float radiusInner
+  );
   static Disc* make(Xray* xray, const Node& n);
   virtual optix::Aabb getBoundingBox() const override;
-  virtual void getBoundingSphere(optix::float3* origin, float* radius) const override;
+  virtual void getBoundingSphere(
+    optix::float3* origin,
+    float* radius
+  ) const override;
 };
 

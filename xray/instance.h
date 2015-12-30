@@ -12,11 +12,22 @@ class Instance {
   optix::GeometryInstance _instance;
   Light* _light;
 
-  Instance(Xray* xray, const Geom* g, const Material* m, const AreaLight* l, int id);
+  Instance(
+    Xray* xray,
+    const Geom* g,
+    const Material* m,
+    const AreaLight* l,
+    int id
+  );
 
 public:
   ~Instance();
-  static Instance* make(Xray* xray, const Geom* g, const Material* m, const AreaLight* l);
+  static Instance* make(
+    Xray* xray,
+    const Geom* g,
+    const Material* m,
+    const AreaLight* l
+  );
   optix::GeometryInstance getGeometryInstance() const;
   Light* getLightInstance() const;
 };

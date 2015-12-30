@@ -26,7 +26,11 @@ struct NormalRayData {
 
   int flags;
 
-  __device__ static NormalRayData make(optix::float3 or, optix::float3 dir, curandState* rng) {
+  __device__ static NormalRayData make(
+    optix::float3 or,
+    optix::float3 dir,
+    curandState* rng
+  ) {
     NormalRayData data;
     data.origin = or;
     data.direction = dir;
@@ -37,14 +41,17 @@ struct NormalRayData {
     return data;
   }
 
-  __device__ static NormalRayData makeShadow(optix::float3 or, optix::float3 dir) {
+  __device__ static NormalRayData makeShadow(
+    optix::float3 or,
+    optix::float3 dir
+  ) {
     NormalRayData data;
     data.origin = or;
     data.direction = dir;
     data.radiance = optix::make_float3(0);
     data.hitNormal = optix::make_float3(0);
     data.lastHitId = -1;
-    data.flags = 0;
+    data.flags = RAY_SKIP_MATERIAL_COMPUTATION;
     return data;
   }
 };

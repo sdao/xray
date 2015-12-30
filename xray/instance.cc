@@ -2,8 +2,13 @@
 #include "noreflect.h"
 #include "cuda/light.cuh"
 
-Instance::Instance(Xray* xray, const Geom* g, const Material* m, const AreaLight* l, int id)
-  : _id(id) {
+Instance::Instance(
+  Xray* xray,
+  const Geom* g,
+  const Material* m,
+  const AreaLight* l,
+  int id
+) : _id(id) {
     _instance = xray->getContext()->createGeometryInstance();
     _instance["id"]->setInt(id);
     _instance->setGeometry(g->getGeometry());

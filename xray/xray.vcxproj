@@ -334,6 +334,7 @@ if not exist "$(ProjectDir)ptx" mkdir "$(ProjectDir)ptx"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="noreflect.h" />
     <ClInclude Include="cuda\bsdf.cuh" />
     <ClInclude Include="cuda\core.cuh" />

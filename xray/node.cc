@@ -59,7 +59,10 @@ float Node::getFloat(std::string key) const {
 
 optix::float3 Node::getFloat3(std::string key) const {
   const NodeFloat3Translator t;
-  auto result = attributes.get_optional<optix::float3, NodeFloat3Translator>(key, t);
+  auto result = attributes.get_optional<
+    optix::float3,
+    NodeFloat3Translator
+  >(key, t);
 
   if (!result) {
     throw std::runtime_error(
@@ -72,8 +75,10 @@ optix::float3 Node::getFloat3(std::string key) const {
 
 const AreaLight* Node::getLight(std::string key) const {
   const Node::NodeLookupTranslator<const AreaLight*> t(container.lights);
-  auto result =
-    attributes.get_optional<const AreaLight*, Node::NodeLookupTranslator<const AreaLight*>>(key, t);
+  auto result = attributes.get_optional<
+    const AreaLight*,
+    Node::NodeLookupTranslator<const AreaLight*>
+  >(key, t);
 
   if (!result) {
     const std::string itemName = attributes.get<std::string>(key);
@@ -87,8 +92,10 @@ const AreaLight* Node::getLight(std::string key) const {
 
 const Material* Node::getMaterial(std::string key) const {
   const Node::NodeLookupTranslator<const Material*> t(container.materials);
-  auto result =
-    attributes.get_optional<const Material*, Node::NodeLookupTranslator<const Material*>>(key, t);
+  auto result = attributes.get_optional<
+    const Material*,
+    Node::NodeLookupTranslator<const Material*>
+  >(key, t);
 
   if (!result) {
     const std::string itemName = attributes.get<std::string>(key);
@@ -102,8 +109,10 @@ const Material* Node::getMaterial(std::string key) const {
 
 const Instance* Node::getGeomInstance(std::string key) const {
   const Node::NodeLookupTranslator<const Instance*> t(container.instances);
-  auto result =
-    attributes.get_optional<const Instance*, Node::NodeLookupTranslator<const Instance*>>(key, t);
+  auto result = attributes.get_optional<
+    const Instance*,
+    Node::NodeLookupTranslator<const Instance*>
+  >(key, t);
 
   if (!result) {
     const std::string itemName = attributes.get<std::string>(key);
@@ -116,7 +125,10 @@ const Instance* Node::getGeomInstance(std::string key) const {
 }
 
 std::vector<const Instance*> Node::getGeomInstanceList(std::string key) const {
-  const Node::NodeLookupTranslator<const Instance*, false> t(container.instances);
+  const Node::NodeLookupTranslator<
+    const Instance*,
+    false
+  > t(container.instances);
   const auto& listRoot = attributes.get_child_optional(key);
 
   if (!listRoot) {

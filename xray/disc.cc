@@ -1,8 +1,18 @@
 #include "disc.h"
 #include "cuda/shared.cuh"
 
-Disc::Disc(Xray* xray, optix::float3 origin, optix::float3 normal, float radiusOuter, float radiusInner)
-  : Geom(xray->getContext()), _origin(origin), _normal(normal), _radiusOuter(radiusOuter), _radiusInner(radiusInner) {
+Disc::Disc(
+  Xray* xray,
+  optix::float3 origin,
+  optix::float3 normal,
+  float radiusOuter,
+  float radiusInner
+) : Geom(xray->getContext()),
+  _origin(origin),
+  _normal(normal),
+  _radiusOuter(radiusOuter),
+  _radiusInner(radiusInner)
+{
   _geom["origin"]->set3fv(&_origin.x);
   _geom["normal"]->set3fv(&_normal.x);
   _geom["radiusOuter"]->setFloat(_radiusOuter);
@@ -45,7 +55,7 @@ optix::Aabb Disc::getBoundingBox() const {
   optix::float3 tr = tangent * _radiusOuter;
   optix::float3 br = binormal * _radiusOuter;
 
-	optix::Aabb aabb(optix::make_float3(0), optix::make_float3(0));
+  optix::Aabb aabb(optix::make_float3(0), optix::make_float3(0));
   aabb.include(_origin + tr + br);
   aabb.include(_origin - tr - br);
   aabb.include(_origin + tr - br);

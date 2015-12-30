@@ -31,7 +31,8 @@ enum MaterialFlags {
 namespace shared {
   using namespace optix;
 
-  __host__ __device__ __inline__ Matrix4x4 rotationThenTranslation(float angle, float3 axis, float3 offset) {
+  __host__ __device__ __inline__
+  Matrix4x4 rotationThenTranslation(float angle, float3 axis, float3 offset) {
     return Matrix4x4::translate(offset) * Matrix4x4::rotate(angle, axis);
   }
 

@@ -8,6 +8,9 @@
 namespace math {
   using namespace optix;
 
+  /**
+   * Determines whether a number is positive, above a small epsilon.
+   */
   __device__ __inline__ bool isPositive(float x) {
     return x > XRAY_EPSILON;
   }
@@ -27,7 +30,8 @@ namespace math {
   }
 
   /**
-   * Determines whether a vec's magnitude is exactly zero, with no epsilon check.
+   * Determines whether a vec's magnitude is exactly zero, with no epsilon
+   * check.
    */
   __device__ __inline__ bool isVectorExactlyZero(const float3& v) {
     return v.x == 0.0f & v.y == 0.0f & v.z == 0.0f;
@@ -41,24 +45,40 @@ namespace math {
     return lerp(x, y, clamp(a, 0.0f, 1.0f));
   }
 
+  /**
+   * Computes a point along a ray at the given parameter.
+   */
   __device__ __inline__ float3 at(const optix::Ray& r, float t) {
     return r.origin + t * r.direction;
   }
 
+  /**
+   * Transforms a point stored in a 3-comp vec using the specified transform.
+   */
   __device__ __inline__ float3 pointXform(float3 v, Matrix4x4 xform) {
     float4 world = xform * make_float4(v.x, v.y, v.z, 1);
     return make_float3(world.x / world.w, world.y / world.w, world.z / world.w);
   }
 
+  /**
+   * Transforms a vector stored in a 3-comp vec using the specified transform.
+   */
   __device__ __inline__ float3 vectorXform(float3 v, Matrix4x4 xform) {
     float4 world = xform * make_float4(v.x, v.y, v.z, 0);
     return make_float3(world.x, world.y, world.z);
   }
 
+  /**
+   * Clamps the given value to the range [0, 1].
+   */
   __device__ __inline__ float saturate(float x) {
-    return x < 0 ? 0 : (x > 1 ? 1 : x);
+    return clamp(x, 0.0f, 1.0f);
   }
 
+  /**
+   * Converts a floating-point RGB color vector to its BGRA integer
+   * representation.
+   */
   __device__ __inline__ uchar4 colorToBgra(const float3& c) {
     return optix::make_uchar4(
       static_cast<unsigned char>(saturate(c.z) * 255.99f), /* B */
@@ -118,16 +138,42 @@ namespace math {
    * Returns Abs[Cos[Theta]] of a vector where Theta is the polar angle of the
    * vector in spherical coordinates.
    */
-  __device__ __inline__ float absCosTheta(const float3& v) { return fabsf(v.z); }
+  __device__ __inline__
+  float absCosTheta(const float3& v) { return fabsf(v.z); }
 
-  __device__ __inline__ float nextFloat(curandState* rngState, float min, float max) {
+  /**
+   * Returns a random float in the range (min, max].
+   */
+  __device__ __inline__
+  float nextFloat(curandState* rngState, float min, float max) {
     return min + (max - min) * curand_uniform(rngState);
   }
 
-  __device__ __inline__ float2 nextFloat2(curandState* rngState, float min, float max) {
-    return make_float2(nextFloat(rngState, min, max), nextFloat(rngState, min, max));
+  /**
+   * Returns a random 2-vector with components in the range (min, max].
+   */
+  __device__ __inline__
+  float2 nextFloat2(curandState* rngState, float min, float max) {
+    return make_float2(
+      nextFloat(rngState, min, max),
+      nextFloat(rngState, min, max)
+    );
   }
 
+  /**
+   * Returns a random integer in the range [min, max).
+   */
+  __device__ __inline__
+  int nextInt(curandState* rngState, int min, int max) {
+    return int(floorf(
+      math::nextFloat(rngState, float(min), float(max) - XRAY_VERY_SMALL)
+    ));
+  }
+
+  /**
+   * Returns a random Gaussian-distributed (normal) float using the standard
+   * normal distribution (mean=0, stdev=1).
+   */
   __device__ __inline__ float nextGaussian(curandState* rngState) {
     return curand_normal(rngState);
   }
@@ -142,7 +188,8 @@ namespace math {
    * @param dx [out] the x-coordinate of the sample
    * @param dy [out] the y-coordinate of the sample
    */
-  __device__ __inline__ void areaSampleDisk(curandState* rngState, float* dx, float* dy) {
+  __device__ __inline__
+  void areaSampleDisk(curandState* rngState, float* dx, float* dy) {
     float2 sample = square_to_disk(nextFloat2(rngState, 0.0f, 1.0f));
     *dx = sample.x;
     *dy = sample.y;
@@ -153,7 +200,8 @@ namespace math {
    * hemisphere using a cosine-weighted distribution. (It does not matter
    * whether the hemisphere is on the positive or negative Z-axis.)
    */
-  __device__ __inline__ float cosineSampleHemispherePDF(const float3& direction) {
+  __device__ __inline__
+  float cosineSampleHemispherePDF(const float3& direction) {
     return absCosTheta(direction) * XRAY_INV_PI;
   }
 
@@ -172,7 +220,8 @@ namespace math {
    * @returns       a cosine-weighted random vector in the hemisphere;
    *                the pointer must not be null
    */
-  __device__ __inline__ float3 cosineSampleHemisphere(curandState* rngState, bool flipped) {
+  __device__ __inline__
+  float3 cosineSampleHemisphere(curandState* rngState, bool flipped) {
     float3 ret;
     areaSampleDisk(rngState, &ret.x, &ret.y);
     ret.z = sqrtf(max(0.0f, 1.0f - ret.x * ret.x - ret.y * ret.y));
@@ -186,7 +235,8 @@ namespace math {
    * Determines if two vectors in the same local coordinate space are in the
    * same hemisphere.
    */
-  __device__ __inline__ bool localSameHemisphere(const float3& u, const float3& v) {
+  __device__ __inline__
+  bool localSameHemisphere(const float3& u, const float3& v) {
     return u.z * v.z >= 0.0f;
   }
 
@@ -231,14 +281,21 @@ namespace math {
    * @param width the maximum x- or y- offset sampled from the pixel center
    * @returns the value of the filter
    */
-  __device__ __inline__ float mitchellFilter(float x, float y, float width = 2.0f) {
+  __device__ __inline__
+  float mitchellFilter(float x, float y, float width = 2.0f) {
     return mitchellFilter(x / width) * mitchellFilter(y / width);
   }
 
+  /**
+   * Determines whether the value is NaN (Not-a-Number).
+   */
   __device__ __inline__ bool isNaN(float x) {
     return x != x;
   }
 
+  /**
+   * Determines whether any of the components of the vector is NaN.
+   */
   __device__ __inline__ bool isNaN(const float3& v) {
     return isNaN(v.x) | isNaN(v.y) | isNaN(v.z);
   }
@@ -255,14 +312,24 @@ namespace math {
    * @param gPdf probability according to the Pg distribution
    * @returns    the weight according to the power heuristic
    */
-  __device__ __inline__ float powerHeuristic(int nf, float fPdf, int ng, float gPdf) {
+  __device__ __inline__
+  float powerHeuristic(int nf, float fPdf, int ng, float gPdf) {
     float f = nf * fPdf;
     float g = ng * gPdf;
 
     return (f * f) / (f * f + g * g);
   }
 
-  __device__ __inline__ bool sphereContains(const float3& or, float r, const float3& v) {
+  /**
+   * Determines whether a point is contained within the sphere.
+   *
+   * @param or the origin of the sphere
+   * @param r  the radius of the sphere
+   * @param v  the point to check
+   * @returns  whether v is in the sphere defined by or and r
+   */
+  __device__ __inline__
+  bool sphereContains(const float3& or, float r, const float3& v) {
     return dot(v - or, v - or) <= (r * r);
   }
 
@@ -314,7 +381,8 @@ namespace math {
    * @param direction the direction of the sampled vector
    * @returns         the probability that the angle was sampled
    */
-  __device__ __inline__ float uniformSampleConePDF(float halfAngle, const float3& direction) {
+  __device__ __inline__
+  float uniformSampleConePDF(float halfAngle, const float3& direction) {
     const float cosHalfAngle = cosf(halfAngle);
     const float solidAngle = XRAY_TWO_PI * (1.0f - cosHalfAngle);
     if (cosTheta(direction) > cosHalfAngle) {
@@ -349,7 +417,8 @@ namespace math {
    * @returns         a uniformally-random vector within halfAngle radians of
    *                  the positive z-axis
    */
-  __device__ __inline__ float3 uniformSampleCone(curandState* rng, float halfAngle) {
+  __device__ __inline__
+  float3 uniformSampleCone(curandState* rng, float halfAngle) {
     float h = cosf(halfAngle);
     float z = nextFloat(rng, h, 1.0f);
     float t = nextFloat(rng, 0.0f, XRAY_TWO_PI);
